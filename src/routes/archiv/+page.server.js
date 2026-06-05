@@ -5,7 +5,7 @@ import { redirect } from "@sveltejs/kit";
 export async function load({ locals }) {
   const db = await getDb();
 
-  let query = { status: { $ne: "erledigt" } };
+  let query = { status: "erledigt" };
   if (locals.user.role !== "admin") {
     query.userId = locals.user._id.toString();
   }
@@ -13,7 +13,7 @@ export async function load({ locals }) {
   const deadlines = await db
     .collection("deadlines")
     .find(query)
-    .sort({ deadline: 1 })
+    .sort({ deadline: -1 })
     .toArray();
 
   let userMap = {};
@@ -34,7 +34,6 @@ export async function load({ locals }) {
       deadline: d.deadline,
       aufwand: d.aufwand,
       prioritaet: d.prioritaet,
-      status: d.status || "offen",
       benutzername: userMap[d.userId] || null,
     })),
   };
@@ -51,6 +50,6 @@ export const actions = {
       query.userId = locals.user._id.toString();
     }
     await db.collection("deadlines").deleteOne(query);
-    redirect(303, "/");
+    redirect(303, "/archiv");
   },
 };

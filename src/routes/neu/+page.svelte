@@ -1,6 +1,20 @@
+<script>
+  import { enhance } from '$app/forms';
+  let laden = false;
+</script>
+
 <h1>Neue Deadline erfassen</h1>
 
-<form method="POST">
+<form
+  method="POST"
+  use:enhance={() => {
+    laden = true;
+    return async ({ update }) => {
+      await update();
+      laden = false;
+    };
+  }}
+>
   <label>
     Titel
     <input type="text" name="titel" placeholder="z.B. Projektarbeit Prototyping" required />
@@ -41,7 +55,13 @@
 
   <div class="buttons">
     <a href="/" class="abbrechen">Abbrechen</a>
-    <button type="submit">💾 Speichern</button>
+    <button type="submit" disabled={laden}>
+      {#if laden}
+        <span class="spinner"></span> Speichern...
+      {:else}
+        💾 Speichern
+      {/if}
+    </button>
   </div>
 </form>
 
@@ -97,9 +117,14 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
-  button:hover { background: #c73652; }
+  button:hover:not(:disabled) { background: #c73652; }
+  button:disabled { opacity: 0.7; cursor: not-allowed; }
 
   .abbrechen {
     flex: 1;
@@ -113,4 +138,15 @@
   }
 
   .abbrechen:hover { background: #e0e2e5; }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
