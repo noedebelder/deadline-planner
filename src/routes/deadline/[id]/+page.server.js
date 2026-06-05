@@ -1,6 +1,6 @@
 import { getDb } from "$lib/db.js";
 import { ObjectId } from "mongodb";
-import { error } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 
 export async function load({ params, locals }) {
   const db = await getDb();
@@ -14,9 +14,7 @@ export async function load({ params, locals }) {
     throw error(404, "Deadline nicht gefunden");
   }
 
-  if (!deadline) {
-    throw error(404, "Deadline nicht gefunden");
-  }
+  if (!deadline) throw error(404, "Deadline nicht gefunden");
 
   if (
     locals.user.role !== "admin" &&
@@ -43,6 +41,9 @@ export async function load({ params, locals }) {
       aufwand: deadline.aufwand,
       prioritaet: deadline.prioritaet,
       status: deadline.status || "offen",
+      typ: deadline.typ || null,
+      fortschritt: deadline.fortschritt ?? 0,
+      notizen: deadline.notizen || null,
       erstellt: deadline.erstellt
         ? new Date(deadline.erstellt).toLocaleDateString("de-CH")
         : null,
@@ -50,3 +51,20 @@ export async function load({ params, locals }) {
     },
   };
 }
+
+export const actions = {
+  fortschritt: async ({ request, params, locals }) => {
+    if (!locals.user) throw redirect(303, "/login");
+
+    const data = await request.formData();
+    const fortschritt = Math.min(100, Math.max(0, Number(data.get("fortschritt")) || 0));
+    const db = await getDb();
+
+    const query = { _id: new ObjectId(params.id) };
+    if (locals.user.role !== "admin") {
+      query.userId = locals.user._id.toString();
+    }
+    await db.collection("deadlines").updateOne(query, { $set: { fortschritt } });
+    return { success: true };
+  },
+};

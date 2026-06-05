@@ -1,4 +1,6 @@
 <script>
+  import { enhance } from "$app/forms";
+  import { addToast } from "$lib/toast.js";
   export let data;
 
   let suche = '';
@@ -69,7 +71,17 @@
             <td>
               <div class="aktionen">
                 <a href="/bearbeiten/{d.id}" class="btn-icon" title="Bearbeiten">✏️</a>
-                <form method="POST" action="?/loeschen">
+                <form
+                  method="POST"
+                  action="?/loeschen"
+                  use:enhance={({ cancel }) => {
+                    if (!confirm("Deadline wirklich löschen?")) { cancel(); return; }
+                    return async ({ update }) => {
+                      addToast("Deadline gelöscht");
+                      await update();
+                    };
+                  }}
+                >
                   <input type="hidden" name="id" value={d.id} />
                   <button type="submit" class="btn-icon btn-delete" title="Löschen">🗑️</button>
                 </form>

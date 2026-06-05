@@ -3,6 +3,8 @@ import { ObjectId } from "mongodb";
 import { redirect } from "@sveltejs/kit";
 
 export async function load({ locals }) {
+  if (!locals.user) throw redirect(303, "/login");
+
   const db = await getDb();
 
   let query = { status: "erledigt" };
@@ -41,6 +43,8 @@ export async function load({ locals }) {
 
 export const actions = {
   loeschen: async ({ request, locals }) => {
+    if (!locals.user) throw redirect(303, "/login");
+
     const data = await request.formData();
     const id = data.get("id");
     const db = await getDb();

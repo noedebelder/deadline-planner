@@ -3,6 +3,10 @@ import { ObjectId } from "mongodb";
 import { redirect } from "@sveltejs/kit";
 
 export async function load({ locals }) {
+  if (!locals.user) {
+    return { isLanding: true };
+  }
+
   const db = await getDb();
 
   let query = { status: { $ne: "erledigt" } };
@@ -26,6 +30,7 @@ export async function load({ locals }) {
   }
 
   return {
+    isLanding: false,
     isAdmin: locals.user.role === "admin",
     deadlines: deadlines.map((d) => ({
       id: d._id.toString(),
@@ -35,6 +40,8 @@ export async function load({ locals }) {
       aufwand: d.aufwand,
       prioritaet: d.prioritaet,
       status: d.status || "offen",
+      typ: d.typ || null,
+      fortschritt: d.fortschritt ?? 0,
       benutzername: userMap[d.userId] || null,
     })),
   };
@@ -42,6 +49,8 @@ export async function load({ locals }) {
 
 export const actions = {
   loeschen: async ({ request, locals }) => {
+    if (!locals.user) throw redirect(303, "/login");
+
     const data = await request.formData();
     const id = data.get("id");
     const db = await getDb();
@@ -52,5 +61,21 @@ export const actions = {
     }
     await db.collection("deadlines").deleteOne(query);
     redirect(303, "/");
+  },
+
+  fortschritt: async ({ request, locals }) => {
+    if (!locals.user) throw redirect(303, "/login");
+
+    const data = await request.formData();
+    const id = data.get("id");
+    const fortschritt = Math.min(100, Math.max(0, Number(data.get("fortschritt")) || 0));
+    const db = await getDb();
+
+    const query = { _id: new ObjectId(id) };
+    if (locals.user.role !== "admin") {
+      query.userId = locals.user._id.toString();
+    }
+    await db.collection("deadlines").updateOne(query, { $set: { fortschritt } });
+    return { success: true };
   },
 };
