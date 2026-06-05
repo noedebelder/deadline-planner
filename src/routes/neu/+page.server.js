@@ -1,26 +1,22 @@
-import { getDb } from '$lib/db.js';
-import { redirect } from '@sveltejs/kit';
+import { getDb } from "$lib/db.js";
+import { redirect } from "@sveltejs/kit";
 
 export const actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
     const data = await request.formData();
 
-    const titel = data.get('titel');
-    const modul = data.get('modul');
-    const deadline = data.get('deadline');
-    const aufwand = Number(data.get('aufwand'));
-    const prioritaet = data.get('prioritaet');
-
     const db = await getDb();
-    await db.collection('deadlines').insertOne({
-      titel,
-      modul,
-      deadline,
-      aufwand,
-      prioritaet,
-      erstellt: new Date()
+    await db.collection("deadlines").insertOne({
+      titel: data.get("titel"),
+      modul: data.get("modul"),
+      deadline: data.get("deadline"),
+      aufwand: Number(data.get("aufwand")),
+      prioritaet: data.get("prioritaet"),
+      status: data.get("status"),
+      userId: locals.user._id.toString(),
+      erstellt: new Date(),
     });
 
-    redirect(303, '/');
-  }
+    redirect(303, "/");
+  },
 };
