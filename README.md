@@ -146,9 +146,13 @@ Im Sketch-Schritt wurden konzeptionelle Varianten für das Layout und die Haupti
 
 #### Skizzen
 
-> 📸 **Screenshot hier einfügen:** Handskizzen aller drei Varianten (Übersichtsseite, Formular, Tagesplanung) – fotografiere oder scanne deine Skizzen und füge sie hier ein.
+![Skizzen](static/images/readme/skizze.png)
 
-_Grobe Skizzen der Hauptseiten für Variante A, B und C._
+_Startseite: Übersicht aller Deadlines mit Statistik-Karten und Warnungen._
+_Wochenplan: Automatische Berechnung des täglichen Arbeitsaufwands pro Deadline._
+_Neue Deadline erfassen: Formular mit den wichtigsten Feldern wie Titel, Modul und Datum._
+_Kalenderansicht: Wochen- und Monatsansicht aller Deadlines._
+_Statistik: Visuelle Auswertung von Aufwand, Status und Priorität aller Deadlines._
 
 ---
 
@@ -196,8 +200,58 @@ _Grobe Skizzen der Hauptseiten für Variante A, B und C._
 
 **Mockup:** [Figma Mockup – Deadline Planner](https://www.figma.com/design/LEyjt3Ir9PwxXuDjK9TyFG/Deadline-Planner-Mockup?node-id=0-1&p=f&t=h5NKSlflyNY1SQ3w-0)
 
-> 📸 **Screenshot hier einfügen:** Screenshots aus Figma – mindestens 3 Screens (Übersicht, Neue Deadline, Tagesplanung). Speichere sie unter `static/images/readme/` und verlinke sie wie folgt:
-> `![Mockup Übersicht](static/images/readme/mockup-uebersicht.png)`
+---
+
+**Screenshot 1 – Übersicht / Dashboard**
+
+![Mockup Übersicht](static/images/readme/mockup-uebersicht.png)
+
+Die Übersichtsseite zeigt die nächsten anstehenden Aufgaben,
+einen kleinen Zeitplan sowie einen groben Gesamtüberblick
+aller Deadlines. Über einen Button kann direkt eine neue
+Aufgabe erfasst werden.
+
+---
+
+**Screenshot 2 – Neue Deadline erfassen**
+
+![Mockup Deadline erfassen](static/images/readme/mockup-deadline-erfassen.png)
+
+Das Formular ermöglicht das Erfassen einer neuen Deadline mit allen
+relevanten Feldern: Titel, Modul, Datum, geschätzter Aufwand in
+Stunden und Priorität.
+
+---
+
+**Screenshot 3 – Kalenderansicht**
+
+![Mockup Kalender](static/images/readme/mockup-kalender.png)
+
+Die Kalenderansicht zeigt alle Deadlines in einer Wochen- oder
+Monatsansicht. Mit den Pfeiltasten kann zwischen Wochen
+bzw. Monaten navigiert werden. Leere Tage werden
+ebenfalls angezeigt.
+
+---
+
+**Screenshot 4 – Modulübersicht**
+
+![Mockup Module](static/images/readme/mockup-module.png)
+
+Die Modulübersicht gruppiert alle Deadlines nach Modul und zeigt
+pro Fach die noch ausstehenden Aufgaben sowie deren Priorität.
+Jede Aufgabe kann direkt bearbeitet oder als erledigt markiert werden.
+
+---
+
+**Screenshot 5 – Statistik**
+
+![Mockup Statistik](static/images/readme/mockup-statistik.png)
+
+Die Statistikseite visualisiert den Fortschritt mit einem
+Liniendiagramm, zeigt die Anzahl erledigter Aufgaben,
+die geplanten Stunden sowie die durchschnittliche Pünktlichkeit
+bei Abgaben.
 
 ---
 
@@ -239,117 +293,135 @@ Deadline Planner
 
 ##### User Interface Design
 
-**Screen 1 – Landingpage (`/` ohne Login)**
-
-> 📸 **Screenshot hier einfügen:** Screenshot der Landingpage mit Hero-Bereich und Feature-Preview. Dateiname: `static/images/readme/landingpage.png`
-
-```markdown
-![Landingpage](static/images/readme/landingpage.png)
-```
-
-Die Landingpage dient als Einstieg für nicht eingeloggte Benutzer. Sie zeigt einen Hero-Bereich mit dem Slogan sowie eine Feature-Preview mit den vier Hauptfunktionen der App. Zwei CTAs («Jetzt anmelden» und «Registrieren») führen neue Nutzer direkt zum Login.
-
-> _Designentscheid:_ Die Landingpage motiviert zur Registrierung durch eine kompakte Darstellung des Mehrwerts, ohne zu überladen.
-
 ---
 
-**Screen 2 – Übersicht (`/` nach Login)**
+**Screen 1 – Übersicht (`/`)**
 
-> 📸 **Screenshot hier einfügen:** Screenshot des Dashboards mit Statistik-Karten oben und Deadline-Tabelle darunter. Dateiname: `static/images/readme/uebersicht.png`
-
-```markdown
 ![Übersicht](static/images/readme/uebersicht.png)
-```
 
-Das Dashboard zeigt oben vier Statistik-Karten (Überfällig, Diese Woche, Geplant, Total Aufwand). Darunter folgt eine farbkodierte Tabelle aller Deadlines mit Spalten für Titel, Modul, Datum, verbleibende Tage, Aufwand, Priorität, Status und Aktionen. Überfällige Zeilen sind rot hinterlegt, kritische orange. Erledigte Deadlines erscheinen durchgestrichen und ausgegraut.
+Die Übersichtsseite ist das zentrale Dashboard der App. Sie zeigt oben
+vier Statistik-Karten mit einem schnellen Überblick über überfällige,
+diese Woche fällige, geplante Deadlines sowie den gesamten Aufwand in
+Stunden. Darunter befindet sich eine farbkodierte Tabelle aller Deadlines
+mit Titel, Modul, Fälligkeitsdatum, verbleibenden Tagen, Aufwand,
+Priorität und Status. Überfällige Einträge sind rot, kritische orange
+hervorgehoben. Erledigte Deadlines erscheinen durchgestrichen.
 
-> _Designentscheid:_ Die Farbkodierung der Zeilen gibt sofortige visuelle Rückmeldung über die Dringlichkeit, ohne dass Nutzende Zahlen lesen müssen.
-
----
-
-**Screen 3 – Neue Deadline (`/neu`)**
-
-> 📸 **Screenshot hier einfügen:** Screenshot des Formulars mit allen Feldern. Dateiname: `static/images/readme/neue-deadline.png`
-
-```markdown
-![Neue Deadline](static/images/readme/neue-deadline.png)
-```
-
-Das Formular enthält folgende Felder: Titel, Modul, Deadline (Datepicker), Geschätzter Aufwand in Stunden, Priorität (Hoch/Mittel/Niedrig), Typ (Prüfung/Projekt/Übung/Seminararbeit/Sonstiges), Status (Offen/In Bearbeitung/Erledigt) und ein optionales Notizfeld. Die Dropdown-Felder werden mit den in den Einstellungen gesetzten Standardwerten vorausgefüllt.
+> _Designentscheid:_ Die Farbkodierung der Zeilen gibt sofortige visuelle
+> Rückmeldung über die Dringlichkeit, ohne dass Nutzende Zahlen lesen müssen.
 
 ---
 
-**Screen 4 – Tagesplanung (`/tagesplanung`)**
+**Screen 2 – Tagesplanung (`/tagesplanung`)**
 
-> 📸 **Screenshot hier einfügen:** Screenshot der Tagesplanung mit h/Tag-Berechnung und Gruppierung nach Dringlichkeit. Dateiname: `static/images/readme/tagesplanung.png`
-
-```markdown
 ![Tagesplanung](static/images/readme/tagesplanung.png)
-```
 
-Die Tagesplanung zeigt für jede offene Deadline eine automatische Berechnung: Aufwand ÷ verbleibende Tage = benötigte Stunden pro Tag. Deadlines werden nach Dringlichkeit gruppiert (Heute, Diese Woche, Später). Eine Tagesziel-Card zeigt den aggregierten Arbeitsaufwand für heute. Smarte Warnungen erscheinen wenn z.B. nächste Woche mehr als 15 Stunden anfallen.
+Die Tagesplanung berechnet automatisch für jede offene Deadline, wie
+viele Stunden pro Tag benötigt werden (Aufwand ÷ verbleibende Tage).
+Die Deadlines sind nach Dringlichkeit gruppiert (Heute, Diese Woche,
+Später). Eine Tagesziel-Card zeigt den aggregierten Gesamtaufwand
+für den heutigen Tag, damit Studierende wissen wie viel Zeit sie
+einplanen müssen.
 
-> _Designentscheid:_ Die Tagesplanung ist das Herzstück der App und löst das Kernproblem: Studierende wissen nicht nur wann, sondern auch wie viel sie täglich arbeiten müssen.
+> _Designentscheid:_ Die Tagesplanung löst das Kernproblem direkt:
+> Studierende wissen nicht nur wann, sondern auch wie viel sie
+> täglich arbeiten müssen.
 
 ---
 
-**Screen 5 – Kalender (`/kalender`)**
+**Screen 3 – Kalenderansicht (`/kalender`)**
 
-> 📸 **Screenshot hier einfügen:** Screenshot der Kalenderansicht, am besten Wochenansicht mit Navigation. Dateiname: `static/images/readme/kalender.png`
-
-```markdown
 ![Kalender](static/images/readme/kalender.png)
-```
 
-Der Kalender bietet zwei Ansichten: Wochenansicht (alle 7 Tage Mo–So, auch leere Tage) und Monatsansicht (klassisches Kalender-Grid). Navigation mit Pfeilen (← →) und «Heute»-Button. Deadlines erscheinen als farbige Badges (rot/orange/grün je nach Priorität). Ein Toggle oben wechselt zwischen Wochen- und Monatsansicht.
+Der Kalender bietet eine Wochen- und Monatsansicht aller Deadlines.
+Mit Pfeiltasten kann zwischen Wochen bzw. Monaten navigiert werden,
+ein «Heute»-Button springt zurück zum aktuellen Zeitraum. Alle Tage
+werden angezeigt, auch leere. Deadlines erscheinen als farbige Badges
+je nach Priorität.
 
----
-
-**Screen 6 – Statistik (`/statistik`)**
-
-> 📸 **Screenshot hier einfügen:** Screenshot der Statistikseite mit Charts und Export-Buttons. Dateiname: `static/images/readme/statistik.png`
-
-```markdown
-![Statistik](static/images/readme/statistik.png)
-```
-
-Die Statistik-Seite zeigt vier Übersichtskarten (Total Deadlines, Gesamtaufwand, Erledigt, Offen), ein Balkendiagramm für den Aufwand pro Modul, eine Statusverteilung mit Fortschrittsbalken und eine Prioritätsverteilung. Export-Buttons ermöglichen den Download als CSV oder iCal.
+> _Designentscheid:_ Auch leere Tage werden angezeigt, damit Nutzende
+> freie Zeitfenster für die Planung erkennen können.
 
 ---
 
-**Screen 7 – KI-Assistent (Floating Widget)**
+**Screen 4 – Modulübersicht (`/module`)**
 
-> 📸 **Screenshot hier einfügen:** Screenshot des geöffneten KI-Chat-Widgets mit einer Beispielkonversation. Dateiname: `static/images/readme/ki-assistent.png`
+![Module](static/images/readme/module.png)
 
-```markdown
-![KI-Assistent](static/images/readme/ki-assistent.png)
-```
+Die Modulübersicht gruppiert alle Deadlines nach Modul und zeigt pro
+Fach die Anzahl offener Aufgaben, den Gesamtaufwand in Stunden sowie
+einen Fortschrittsbalken mit dem Anteil erledigter Aufgaben. So ist
+auf einen Blick erkennbar, welches Modul am meisten Aufmerksamkeit
+benötigt. Jede Deadline kann direkt bearbeitet oder als erledigt
+markiert werden.
 
-Der KI-Assistent ist als schwebendes Chat-Widget rechts unten auf jeder Seite sichtbar. Er öffnet sich standardmässig beim Laden der App und kann geschlossen werden. Das Widget zeigt den Chatverlauf, Schnell-Buttons (Tagesplan, Priorität, 2h Zeit) und ein Texteingabefeld. Ein «Neues Gespräch»-Button setzt den Verlauf zurück. Der Assistent kennt alle Deadlines des eingeloggten Users und gibt personalisierte Empfehlungen.
-
----
-
-**Screen 8 – Admin-Panel (`/admin`)**
-
-> 📸 **Screenshot hier einfügen:** Screenshot des Admin-Panels mit Benutzertabelle und Formular. Dateiname: `static/images/readme/admin.png`
-
-```markdown
-![Admin-Panel](static/images/readme/admin.png)
-```
-
-Das Admin-Panel ist nur für Benutzer mit der Rolle «admin» zugänglich. Es zeigt eine Tabelle aller registrierten Benutzer mit Name, E-Mail, Rolle und Erstellungsdatum. Ein Inline-Formular ermöglicht das Erstellen neuer Benutzer mit Passwort und Rollenzuweisung.
+> _Designentscheid:_ Die modulbasierte Gruppierung ermöglicht eine
+> semesterbezogene Planung, die über die reine Deadline-Liste hinausgeht.
 
 ---
 
-**Screen 9 – Einstellungen (`/einstellungen`)**
+**Screen 5 – Statistik (`/statistik`)**
 
-> 📸 **Screenshot hier einfügen:** Screenshot der Einstellungsseite mit Profil, Benachrichtigungen und Navigation. Dateiname: `static/images/readme/einstellungen.png`
+![Statistik](static/images/readme/statistiken.png)
 
-```markdown
+Die Statistikseite visualisiert den Fortschritt mit verschiedenen
+Charts: Aufwand pro Modul als Balkendiagramm, Statusverteilung
+(Offen / In Bearbeitung / Erledigt) sowie Prioritätsverteilung.
+Export-Buttons ermöglichen den Download aller Deadlines als
+CSV- oder iCal-Datei für den Import in externe Kalender-Apps.
+
+> _Designentscheid:_ CSS-basierte Charts ohne externe Bibliothek
+> halten die App schlank und schnell.
+
+---
+
+**Screen 6 – Archiv (`/archiv`)**
+
+![Archiv](static/images/readme/archiv.png)
+
+Das Archiv zeigt alle erledigten Deadlines separat, damit die
+Hauptübersicht übersichtlich bleibt. Erledigte Einträge werden
+automatisch ins Archiv verschoben sobald ihr Status auf
+«Erledigt» gesetzt wird.
+
+> _Designentscheid:_ Die Trennung von aktiven und erledigten
+> Deadlines reduziert die visuelle Komplexität der Hauptübersicht.
+
+---
+
+**Screen 7 – Einstellungen (`/einstellungen`)**
+
 ![Einstellungen](static/images/readme/einstellungen.png)
-```
 
-Die Einstellungsseite bietet drei Bereiche: Profil (Anzeigename, E-Mail, Passwort), Benachrichtigungen (E-Mail bei Deadline < 1 Tag, Standard: aus) und Navigation anpassen (Seiten in der Tab-Leiste ein-/ausschalten).
+Die Einstellungsseite bietet vier Bereiche: Profil (Anzeigename,
+E-Mail, Passwort ändern), Benachrichtigungen (E-Mail bei Deadline
+unter 1 Tag, Standard: ausgeschaltet), Navigation anpassen
+(Seiten in der Tab-Leiste ein- und ausschalten) sowie
+Standard-Einstellungen für neue Deadlines (Priorität, Status, Typ).
+
+> _Designentscheid:_ Nutzende können die Navigation nach eigenen
+> Bedürfnissen konfigurieren und nur die Seiten anzeigen,
+> die sie wirklich nutzen.
+
+---
+
+**Screen 8 – KI-Assistent (Floating Widget)**
+
+![KI-Assistent](static/images/readme/ki-assistent.png)
+
+Der KI-Assistent ist als schwebendes Chat-Widget rechts unten
+auf jeder Seite verfügbar. Er öffnet sich standardmässig beim
+Laden der App und kann bei Bedarf geschlossen werden. Das Widget
+zeigt den Chatverlauf, Schnell-Buttons für häufige Fragen
+(Tagesplan, Priorität, 2h Zeit) sowie ein Texteingabefeld.
+Der Assistent kennt alle aktuellen Deadlines des eingeloggten
+Users und gibt personalisierte Empfehlungen für Tagesplanung
+und Priorisierung. Ein «Neues Gespräch»-Button setzt den
+Verlauf zurück.
+
+> _Designentscheid:_ Das floating Widget unterbricht den
+> Workflow nicht – der KI-Assistent ist jederzeit erreichbar,
+> ohne eine eigene Seite aufrufen zu müssen.
 
 ---
 
