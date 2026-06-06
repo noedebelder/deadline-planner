@@ -56,11 +56,11 @@ Nutze Emojis sparsam für bessere Lesbarkeit.`;
     });
 
     return json({ reply: response.content[0].text });
-  } catch (e) {
-    console.error("Anthropic API error:", e);
-    return json(
-      { error: "KI-Service momentan nicht verfügbar. Bitte versuche es später erneut." },
-      { status: 503 }
-    );
+  } catch (error) {
+    console.error("Anthropic API Error:", error);
+    return json({
+      reply: "❌ KI-Service momentan nicht verfügbar. Bitte versuche es später erneut.",
+      error: true,
+    });
   }
 }
