@@ -5,10 +5,7 @@ export async function load({ locals }) {
   if (!locals.user) throw redirect(303, "/login");
 
   const db = await getDb();
-  let query = { status: { $ne: "erledigt" } };
-  if (locals.user.role !== "admin") {
-    query.userId = locals.user._id.toString();
-  }
+  const query = { status: { $ne: "erledigt" }, userId: locals.user._id.toString() };
 
   const deadlines = await db
     .collection("deadlines")

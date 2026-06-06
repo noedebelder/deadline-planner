@@ -2,6 +2,7 @@ import { getDb } from "$lib/db.js";
 import { ObjectId } from "mongodb";
 import { fail } from "@sveltejs/kit";
 import bcrypt from "bcryptjs";
+import { validatePassword } from "$lib/validation.js";
 
 export async function load({ locals }) {
   const db = await getDb();
@@ -18,6 +19,7 @@ export async function load({ locals }) {
     profil: {
       id: locals.user._id.toString(),
       username: locals.user.username,
+      email: locals.user.email || "",
       role: locals.user.role,
       erstellt: locals.user.erstellt
         ? new Date(locals.user.erstellt).toLocaleDateString("de-CH")
@@ -34,8 +36,9 @@ export const actions = {
     const altesPasswort = data.get("altes_passwort");
     const neuesPasswort = data.get("neues_passwort");
 
-    if (!neuesPasswort || neuesPasswort.length < 6) {
-      return fail(400, { error: "Neues Passwort mind. 6 Zeichen erforderlich" });
+    const pwError = validatePassword(neuesPasswort);
+    if (pwError) {
+      return fail(400, { error: pwError });
     }
 
     const db = await getDb();

@@ -67,6 +67,7 @@
         <a href="/tagesplanung" class:active={$page.url.pathname === "/tagesplanung"} on:click={schliessMenu}>Tagesplanung</a>
         <a href="/module" class:active={$page.url.pathname === "/module"} on:click={schliessMenu}>Module</a>
         <a href="/kalender" class:active={$page.url.pathname === "/kalender"} on:click={schliessMenu}>Kalender</a>
+        <a href="/assistent" class:active={$page.url.pathname === "/assistent"} on:click={schliessMenu}>🤖 KI-Assistent</a>
         <a href="/archiv" class:active={$page.url.pathname === "/archiv"} on:click={schliessMenu}>Archiv</a>
         <a href="/statistik" class:active={$page.url.pathname === "/statistik"} on:click={schliessMenu}>Statistik</a>
         {#if data.user.role === "admin"}
@@ -77,6 +78,7 @@
           <button class="dark-toggle" on:click={toggleDark} title={darkMode ? "Helles Design" : "Dunkles Design"} type="button">
             {darkMode ? "☀️" : "🌙"}
           </button>
+          <a href="/einstellungen" class="profil-link" class:active={$page.url.pathname === "/einstellungen"} on:click={schliessMenu} title="Einstellungen">⚙️</a>
           <a href="/profil" class="profil-link" class:active={$page.url.pathname === "/profil"} on:click={schliessMenu}>
             👤 {data.user.username}
           </a>

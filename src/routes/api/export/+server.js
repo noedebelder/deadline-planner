@@ -1,12 +1,15 @@
 import { getDb } from "$lib/db.js";
 
-function csvEscape(value) {
-  if (value == null) return "";
+function csvField(value) {
+  if (value == null) return '""';
   const str = String(value);
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
+  return `"${str.replace(/"/g, '""')}"`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-");
+  return `${d}.${m}.${y}`;
 }
 
 export async function GET({ locals, url }) {
@@ -17,10 +20,7 @@ export async function GET({ locals, url }) {
   const db = await getDb();
   const nurAktiv = url.searchParams.get("archiv") !== "1";
 
-  let query = {};
-  if (locals.user.role !== "admin") {
-    query.userId = locals.user._id.toString();
-  }
+  const query = { userId: locals.user._id.toString() };
   if (nurAktiv) {
     query.status = { $ne: "erledigt" };
   }
@@ -31,15 +31,6 @@ export async function GET({ locals, url }) {
     .sort({ deadline: 1 })
     .toArray();
 
-  let userMap = {};
-  if (locals.user.role === "admin") {
-    const users = await db
-      .collection("users")
-      .find({}, { projection: { username: 1 } })
-      .toArray();
-    users.forEach((u) => (userMap[u._id.toString()] = u.username));
-  }
-
   const headers = [
     "Titel",
     "Modul",
@@ -47,24 +38,25 @@ export async function GET({ locals, url }) {
     "Aufwand (h)",
     "Priorität",
     "Status",
-    ...(locals.user.role === "admin" ? ["Benutzer"] : []),
+    "Typ",
+    "Fortschritt (%)",
   ];
 
   const rows = deadlines.map((d) => [
-    csvEscape(d.titel),
-    csvEscape(d.modul),
-    csvEscape(d.deadline),
-    csvEscape(d.aufwand),
-    csvEscape(d.prioritaet),
-    csvEscape(d.status || "offen"),
-    ...(locals.user.role === "admin"
-      ? [csvEscape(userMap[d.userId] || "")]
-      : []),
+    csvField(d.titel),
+    csvField(d.modul),
+    csvField(formatDate(d.deadline)),
+    csvField(d.aufwand),
+    csvField(d.prioritaet),
+    csvField(d.status || "offen"),
+    csvField(d.typ || ""),
+    csvField(d.fortschritt ?? 0),
   ]);
 
+  const BOM = "﻿";
   const csv =
-    "﻿" +
-    [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
+    BOM +
+    [headers.map(csvField).join(","), ...rows.map((r) => r.join(","))].join("\r\n");
 
   const datum = new Date().toISOString().split("T")[0];
 

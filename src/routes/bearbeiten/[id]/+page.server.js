@@ -17,10 +17,7 @@ export async function load({ params, locals }) {
 
   if (!deadline) throw error(404, "Deadline nicht gefunden");
 
-  if (
-    locals.user.role !== "admin" &&
-    deadline.userId !== locals.user._id.toString()
-  ) {
+  if (deadline.userId !== locals.user._id.toString()) {
     throw error(403, "Kein Zugriff");
   }
 
@@ -36,6 +33,7 @@ export async function load({ params, locals }) {
       typ: deadline.typ || "Sonstiges",
       fortschritt: deadline.fortschritt ?? 0,
       notizen: deadline.notizen || "",
+      hasSubtasks: !!(deadline.subtasks?.length),
     },
   };
 }
@@ -47,10 +45,7 @@ export const actions = {
     const data = await request.formData();
     const db = await getDb();
 
-    const query = { _id: new ObjectId(params.id) };
-    if (locals.user.role !== "admin") {
-      query.userId = locals.user._id.toString();
-    }
+    const query = { _id: new ObjectId(params.id), userId: locals.user._id.toString() };
 
     const notizen = data.get("notizen")?.trim() || null;
 

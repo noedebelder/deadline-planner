@@ -24,12 +24,12 @@
       {/if}
       <form method="POST" action="?/anmelden">
         <label>
-          Benutzername
-          <input type="text" name="username" required placeholder="admin" />
+          E-Mail-Adresse
+          <input type="email" name="email" required placeholder="name@beispiel.ch" autocomplete="email" />
         </label>
         <label>
           Passwort
-          <input type="password" name="password" required placeholder="••••••••" />
+          <input type="password" name="password" required placeholder="••••••••" autocomplete="current-password" />
         </label>
         <button type="submit">Anmelden →</button>
       </form>
@@ -40,12 +40,16 @@
       {/if}
       <form method="POST" action="?/registrieren">
         <label>
-          Benutzername <small>(min. 3 Zeichen)</small>
-          <input type="text" name="username" required placeholder="mein-benutzername" />
+          Anzeigename <small>(min. 3 Zeichen)</small>
+          <input type="text" name="username" required placeholder="Mein Name" autocomplete="name" />
         </label>
         <label>
-          Passwort <small>(min. 6 Zeichen)</small>
-          <input type="password" name="password" required placeholder="••••••••" />
+          E-Mail-Adresse
+          <input type="email" name="email" required placeholder="name@beispiel.ch" autocomplete="email" />
+        </label>
+        <label>
+          Passwort <small>(min. 8 Zeichen, 1 Grossbuchstabe, 1 Zahl)</small>
+          <input type="password" name="password" required placeholder="••••••••" autocomplete="new-password" minlength="8" />
         </label>
         <button type="submit">Konto erstellen →</button>
       </form>
@@ -74,7 +78,7 @@
     border-radius: 16px;
     padding: 2.5rem;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     text-align: center;
   }
@@ -140,6 +144,7 @@
   label small {
     font-weight: 400;
     color: #aaa;
+    font-size: 0.8rem;
   }
   input {
     padding: 0.75rem 1rem;

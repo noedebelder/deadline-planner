@@ -17,8 +17,12 @@
     <h2>Kontoinformationen</h2>
     <div class="info-liste">
       <div class="info-zeile">
-        <span class="info-label">Benutzername</span>
+        <span class="info-label">Anzeigename</span>
         <span class="info-wert"><strong>{data.profil.username}</strong></span>
+      </div>
+      <div class="info-zeile">
+        <span class="info-label">E-Mail</span>
+        <span class="info-wert">{data.profil.email || '—'}</span>
       </div>
       <div class="info-zeile">
         <span class="info-label">Rolle</span>
@@ -77,8 +81,8 @@
         <input type="password" name="altes_passwort" required placeholder="••••••••" />
       </label>
       <label>
-        Neues Passwort <small>(min. 6 Zeichen)</small>
-        <input type="password" name="neues_passwort" required placeholder="••••••••" minlength="6" />
+        Neues Passwort <small>(min. 8 Zeichen, 1 Grossbuchstabe, 1 Zahl)</small>
+        <input type="password" name="neues_passwort" required placeholder="••••••••" minlength="8" />
       </label>
       <button type="submit" disabled={laden}>
         {#if laden}

@@ -17,10 +17,8 @@ export async function load({ locals }) {
       const query = {
         deadline: { $gte: heuteStr, $lte: inDreiTagenStr },
         status: { $ne: "erledigt" },
+        userId: locals.user._id.toString(),
       };
-      if (locals.user.role !== "admin") {
-        query.userId = locals.user._id.toString();
-      }
 
       baldFaellig = await db.collection("deadlines").countDocuments(query);
     } catch {

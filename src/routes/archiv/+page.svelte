@@ -51,7 +51,6 @@
           <th>Deadline</th>
           <th>Aufwand</th>
           <th>Priorität</th>
-          {#if data.isAdmin}<th>Benutzer</th>{/if}
           <th>Aktionen</th>
         </tr>
       </thead>
@@ -65,9 +64,6 @@
             <td>{new Date(d.deadline).toLocaleDateString('de-CH')}</td>
             <td>{d.aufwand}h</td>
             <td><span class="prio {d.prioritaet}">{d.prioritaet}</span></td>
-            {#if data.isAdmin}
-              <td><span class="user-badge">{d.benutzername || '—'}</span></td>
-            {/if}
             <td>
               <div class="aktionen">
                 <a href="/bearbeiten/{d.id}" class="btn-icon" title="Bearbeiten">✏️</a>
@@ -91,7 +87,7 @@
         {/each}
         {#if gefiltert.length === 0 && suche}
           <tr>
-            <td colspan={data.isAdmin ? 7 : 6} class="keine-zeile">Keine Treffer für „{suche}".</td>
+            <td colspan="6" class="keine-zeile">Keine Treffer für „{suche}".</td>
           </tr>
         {/if}
       </tbody>

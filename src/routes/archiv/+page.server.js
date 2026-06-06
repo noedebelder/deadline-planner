@@ -7,25 +7,13 @@ export async function load({ locals }) {
 
   const db = await getDb();
 
-  let query = { status: "erledigt" };
-  if (locals.user.role !== "admin") {
-    query.userId = locals.user._id.toString();
-  }
+  const query = { status: "erledigt", userId: locals.user._id.toString() };
 
   const deadlines = await db
     .collection("deadlines")
     .find(query)
     .sort({ deadline: -1 })
     .toArray();
-
-  let userMap = {};
-  if (locals.user.role === "admin") {
-    const users = await db
-      .collection("users")
-      .find({}, { projection: { username: 1 } })
-      .toArray();
-    users.forEach((u) => (userMap[u._id.toString()] = u.username));
-  }
 
   return {
     isAdmin: locals.user.role === "admin",
@@ -36,7 +24,6 @@ export async function load({ locals }) {
       deadline: d.deadline,
       aufwand: d.aufwand,
       prioritaet: d.prioritaet,
-      benutzername: userMap[d.userId] || null,
     })),
   };
 }
@@ -49,10 +36,7 @@ export const actions = {
     const id = data.get("id");
     const db = await getDb();
 
-    const query = { _id: new ObjectId(id) };
-    if (locals.user.role !== "admin") {
-      query.userId = locals.user._id.toString();
-    }
+    const query = { _id: new ObjectId(id), userId: locals.user._id.toString() };
     await db.collection("deadlines").deleteOne(query);
     redirect(303, "/archiv");
   },

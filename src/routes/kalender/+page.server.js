@@ -1,16 +1,13 @@
 import { getDb } from "$lib/db.js";
+import { redirect } from "@sveltejs/kit";
 
 export async function load({ locals }) {
+  if (!locals.user) throw redirect(303, "/login");
+
   const db = await getDb();
-
-  let query = {};
-  if (locals.user.role !== "admin") {
-    query.userId = locals.user._id.toString();
-  }
-
   const deadlines = await db
     .collection("deadlines")
-    .find(query)
+    .find({ userId: locals.user._id.toString() })
     .sort({ deadline: 1 })
     .toArray();
 
@@ -22,6 +19,7 @@ export async function load({ locals }) {
       deadline: d.deadline,
       prioritaet: d.prioritaet,
       status: d.status || "offen",
+      typ: d.typ || null,
     })),
   };
 }

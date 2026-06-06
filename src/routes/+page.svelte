@@ -182,7 +182,7 @@
 {:else}
 <div class="header">
   <div>
-    <h1>{data.isAdmin ? "Alle Deadlines" : "Meine Deadlines"}</h1>
+    <h1>Meine Deadlines</h1>
     <p class="subtitle">{sortiert.length} aktive Aufgabe{sortiert.length !== 1 ? "n" : ""}</p>
   </div>
   <div class="header-rechts">
@@ -257,7 +257,6 @@
           <th class="sortierbar" on:click={() => sort("prioritaet")}>Priorität{sortPfeil("prioritaet")}</th>
           <th class="sortierbar" on:click={() => sort("status")}>Status{sortPfeil("status")}</th>
           <th>Fortschritt</th>
-          {#if data.isAdmin}<th>Benutzer</th>{/if}
           <th>Aktionen</th>
         </tr>
       </thead>
@@ -268,6 +267,11 @@
               <a href="/deadline/{d.id}" class="titel-link"><strong>{d.titel}</strong></a>
               {#if d.typ && d.typ !== "Sonstiges"}
                 <span class="typ-pill">{d.typ}</span>
+              {/if}
+              {#if d.subtaskCount > 0}
+                <span class="subtask-pill {d.subtaskErledigt === d.subtaskCount ? 'subtask-done' : ''}">
+                  ✓ {d.subtaskErledigt}/{d.subtaskCount}
+                </span>
               {/if}
             </td>
             <td data-label="Modul">{d.modul}</td>
@@ -283,7 +287,13 @@
                 <span class="badge {statusKlasse(d.deadline)}">{tageVerbleibend(d.deadline)}d</span>
               {/if}
             </td>
-            <td data-label="Aufwand">{d.aufwand}h</td>
+            <td data-label="Aufwand">
+              {#if d.subtaskCount > 0}
+                <span title="{d.aufwand}h total">{d.aufwandVerbleibend}h</span>
+              {:else}
+                {d.aufwand}h
+              {/if}
+            </td>
             <td data-label="Priorität"><span class="prio {d.prioritaet}">{d.prioritaet}</span></td>
             <td data-label="Status"><span class="status-badge {d.status}">{d.status}</span></td>
             <td data-label="Fortschritt" class="fortschritt-zelle">
@@ -317,9 +327,6 @@
                 </button>
               {/if}
             </td>
-            {#if data.isAdmin}
-              <td data-label="Benutzer"><span class="user-badge">{d.benutzername || "—"}</span></td>
-            {/if}
             <td data-label="Aktionen">
               <div class="aktionen">
                 <a href="/deadline/{d.id}" class="btn-icon" title="Details">👁️</a>
@@ -339,7 +346,7 @@
         {/each}
         {#if sortiert.length === 0 && suche}
           <tr>
-            <td colspan={data.isAdmin ? 10 : 9} class="keine-zeile">Keine Deadlines für „{suche}" gefunden.</td>
+            <td colspan="9" class="keine-zeile">Keine Deadlines für „{suche}" gefunden.</td>
           </tr>
         {/if}
       </tbody>
@@ -662,6 +669,12 @@
     padding: 0.1rem 0.45rem; border-radius: 8px; margin-left: 0.4rem; vertical-align: middle;
     font-weight: 500;
   }
+  .subtask-pill {
+    display: inline-block; font-size: 0.68rem; background: #f0fff4; color: #27ae60;
+    padding: 0.1rem 0.45rem; border-radius: 8px; margin-left: 0.3rem; vertical-align: middle;
+    font-weight: 600; border: 1px solid rgba(39,174,96,0.2);
+  }
+  .subtask-pill.subtask-done { background: #eafaf1; color: #1a9e55; }
 
   /* Badges */
   .badge {

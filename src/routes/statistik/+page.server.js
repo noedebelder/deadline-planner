@@ -3,10 +3,7 @@ import { getDb } from "$lib/db.js";
 export async function load({ locals }) {
   const db = await getDb();
 
-  let query = {};
-  if (locals.user.role !== "admin") {
-    query = { userId: locals.user._id.toString() };
-  }
+  const query = { userId: locals.user._id.toString() };
 
   const deadlines = await db.collection("deadlines").find(query).toArray();
 
