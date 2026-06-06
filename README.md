@@ -16,11 +16,14 @@
    3. [Tagesplanung / Workload-Rechner](#43-tagesplanung--workload-rechner)
    4. [Modulübersicht](#44-modulübersicht)
    5. [Statistik-Dashboard](#45-statistik-dashboard)
-   6. [Kalenderansicht](#46-kalenderansicht)
-   7. [iCal-Export](#47-ical-export)
-   8. [Status & Fortschritts-Tracking](#48-status--fortschritts-tracking)
-   9. [Smarte Warnungen & Benachrichtigungen](#49-smarte-warnungen--benachrichtigungen)
-   10. [Dark Mode](#410-dark-mode)
+   6. [Kalenderansicht (Woche & Monat)](#46-kalenderansicht-woche--monat)
+   7. [KI-Assistent (Floating Widget)](#47-ki-assistent-floating-widget)
+   8. [Benachrichtigungs-Glocke](#48-benachrichtigungs-glocke)
+   9. [E-Mail-Benachrichtigungen](#49-e-mail-benachrichtigungen)
+   10. [Hell/Dunkel-Modus](#410-helldunkel-modus)
+   11. [Einstellungsseite](#411-einstellungsseite)
+   12. [Archiv](#412-archiv)
+   13. [iCal- & CSV-Export](#413-ical---csv-export)
 5. [Projektorganisation](#5-projektorganisation)
 6. [KI-Deklaration](#6-ki-deklaration)
 7. [Anhang](#7-anhang)
@@ -33,44 +36,46 @@
 
   Ein weiteres Problem besteht darin, dass Deadlines oft nur als fixe Termine wahrgenommen werden, ohne eine sinnvolle Planung der dafür benötigten Arbeitszeit. Studierende wissen zwar, wann etwas abgegeben werden muss, jedoch nicht, wann sie effektiv damit beginnen sollten.
 
-  Zudem fehlt häufig eine Priorisierung der Aufgaben. Wenn mehrere Deadlines gleichzeitig anstehen, fällt es schwer zu entscheiden, welche Aufgaben zuerst erledigt werden sollen. _(Beispiel: Eine Studentin hat gleichzeitig eine Seminararbeit, ein Gruppenreferat und eine Online-Prüfung – sie verliert den Überblick, wann sie mit welcher Aufgabe beginnen soll.)_
+  Zudem fehlt häufig eine Priorisierung der Aufgaben. Wenn mehrere Deadlines gleichzeitig anstehen, fällt es schwer zu entscheiden, welche Aufgaben zuerst erledigt werden sollen. _(Beispiel: Ein Student hat gleichzeitig eine Seminararbeit, ein Gruppenreferat und eine Online-Prüfung – er verliert den Überblick, wann er mit welcher Aufgabe beginnen soll.)_
 
 - **Ziele:**
-  - Kostenlose Webapplikation zur zentralen Verwaltung aller Deadlines
+  - Kostenlose Webapplikation zur zentralen Verwaltung aller Studien-Deadlines
   - Automatische Berechnung des täglichen Arbeitsaufwands pro Deadline
-  - Priorisierung von Aufgaben (hoch / mittel / niedrig)
+  - Priorisierung von Aufgaben (hoch / mittel / niedrig) mit farblicher Kennzeichnung
   - Status-Tracking pro Deadline (Offen / In Bearbeitung / Erledigt)
   - Visuelle Warnungen bei nahenden oder überfälligen Deadlines
-  - Benutzerregistrierung und persönliches Konto mit Rollenverwaltung
+  - Benutzerregistrierung mit persönlichem Konto und Rollenverwaltung
+  - KI-gestützter Assistent für individuelle Tagesplanung und Priorisierungsempfehlungen
 
-- **Primäre Zielgruppe:** Studierende im Alter von 18–30 Jahren, die mehrere Module parallel besuchen und regelmässig Aufgaben und Projekte abgeben müssen. Die Anwendung richtet sich insbesondere an Personen, die neben dem Studium noch einem Nebenjob nachgehen und ihr Zeitbudget effizient einteilen müssen.
+- **Primäre Zielgruppe:** Studierende im Alter von 18–30 Jahren, die mehrere Module parallel besuchen und regelmässig Aufgaben, Projekte und Prüfungen abgeben müssen. Die Anwendung richtet sich insbesondere an Personen, die neben dem Studium noch einem Nebenjob nachgehen und ihr Zeitbudget effizient einteilen müssen.
 
 - **Weitere Stakeholder:**
-  - _Dozierende:_ Können als Admin-User die Plattform zur Übersicht über Studierendenaktivitäten nutzen
-  - _Studiengangskoordinatoren:_ Könnten aggregierte Auswertungen zur Semesterplanung nutzen
+  - _Dozierende:_ Könnten die Plattform zur Übersicht über Abgabeverhalten nutzen
+  - _Studiengangskoordinatoren:_ Könnten aggregierte Semesterplanungen einsehen
 
 ---
 
 ## 2. Lösungsidee
 
-Deadline Planner ist eine kostenlose, webbasierte Applikation, die Studierenden ermöglicht, ihre Abgaben und Prüfungen zentral zu verwalten, den benötigten Arbeitsaufwand zu planen und nie wieder eine wichtige Deadline zu verpassen.
+Deadline Planner ist eine kostenlose, webbasierte Applikation, die Studierenden ermöglicht, ihre Abgaben und Prüfungen zentral zu verwalten, den benötigten Arbeitsaufwand pro Tag zu planen und nie wieder eine wichtige Deadline zu verpassen.
 
 - **Kernfunktionalität:** Die App deckt vier zentrale Workflows ab:
-  1. **Deadline erfassen:** Neue Deadline → Titel, Modul, Datum, Aufwand, Priorität, Typ eingeben → Speichern → erscheint in der Übersicht
-  2. **Tagesplanung prüfen:** Login → Tagesplanung → automatische Berechnung h/Tag → Tagesziel sichtbar
-  3. **Fortschritt tracken:** Deadline öffnen → Status anpassen (Offen / In Bearbeitung / Erledigt) → Fortschritt in % setzen
-  4. **Übersicht behalten:** Dashboard → farbkodierte Warnungen → Statistiken → Modulübersicht
+  1. **Deadline erfassen:** Neue Deadline → Titel, Modul, Datum, Aufwand, Priorität und Typ eingeben → Speichern → erscheint sofort in der Übersicht
+  2. **Tagesplanung prüfen:** Login → Tagesplanung → automatische Berechnung h/Tag → Tagesziel sichtbar, gruppiert nach Dringlichkeit
+  3. **Fortschritt tracken:** Deadline öffnen → Status anpassen (Offen / In Bearbeitung / Erledigt) → Fortschritt in % setzen → Archiv bei Erledigung
+  4. **KI-Assistent befragen:** Floating Button öffnen → Frage stellen (z.B. «Erstelle mir einen Tagesplan für heute») → personalisierte Antwort basierend auf echten Deadlines
 
 - **Annahmen:**
   - Studierende sind bereit, Deadlines einmalig manuell einzutragen, wenn der Aufwand gering und die Oberfläche intuitiv ist
   - Eine automatische Berechnung des täglichen Arbeitsaufwands reduziert das Aufschieben von Aufgaben
   - Eine klare Visualisierung von Priorität und verbleibenden Tagen reicht als tägliche Rückmeldung aus
+  - Ein integrierter KI-Assistent mit Zugang zu den echten Deadlines ist wertvoller als generische Planungstools
 
 - **Abgrenzung:**
   - Keine automatische Synchronisation mit Moodle oder anderen Lernplattformen
   - Kein integrierter Chat oder Kollaborationsfunktionen für Gruppenarbeiten
   - Keine mobile App (iOS/Android), reine Webapplikation
-  - Keine E-Mail- oder Push-Benachrichtigungen im aktuellen Umfang
+  - Keine Push-Benachrichtigungen – E-Mail-Benachrichtigungen nur auf Wunsch des Users
 
 ---
 
@@ -84,7 +89,7 @@ Deadline Planner ist eine kostenlose, webbasierte Applikation, die Studierenden 
 
 Viele Studierende verlassen sich auf Moodle-Kalender oder handschriftliche Notizen, um Deadlines zu verfolgen. Diese Lösungen bieten jedoch keine aktive Unterstützung bei der Planung. Bestehende Apps wie Todoist oder Google Tasks decken zwar allgemeine Aufgabenverwaltung ab, bieten jedoch keine auf Studierende ausgerichtete Funktionalität wie automatische Aufwandsverteilung oder modulbezogene Übersichten.
 
-Die Recherche zeigt, dass das Kernproblem nicht das Vergessen von Deadlines ist, sondern das fehlende Bewusstsein, wann mit einer Aufgabe begonnen werden muss. Eine Deadline in zwei Wochen mit 10 Stunden Aufwand erfordert, heute zu beginnen – das zeigen bestehende Lösungen nicht.
+Die Recherche zeigt, dass das Kernproblem nicht das Vergessen von Deadlines ist, sondern das fehlende Bewusstsein, wann mit einer Aufgabe begonnen werden muss. Eine Deadline in zwei Wochen mit 10 Stunden Aufwand erfordert, heute zu beginnen – das zeigen bestehende Lösungen nicht. Hinzu kommt, dass bei mehreren gleichzeitigen Deadlines keine intelligente Priorisierungshilfe vorhanden ist.
 
 ---
 
@@ -119,7 +124,10 @@ Die Recherche zeigt, dass das Kernproblem nicht das Vergessen von Deadlines ist,
 - Der **Einstieg in die App** muss reibungslos sein – zu viele Pflichtfelder bei der Registrierung schrecken ab
 - Studierende wollen **Module trennen** können, um den Gesamtaufwand pro Fach zu verstehen
 - Eine **Verbindung zwischen Deadline und konkretem Tagesplan** wird als fehlend in bestehenden Lösungen identifiziert
-- **Überfällige Deadlines** sollen sofort erkennbar sein – visuelle Warnungen mit Farbe und Icon
+- **Überfällige Deadlines** sollen sofort erkennbar sein – visuelle Warnungen mit Farbe sind essenziell
+- Ein **KI-Assistent** der die echten Deadlines kennt, wird als deutlich hilfreicher bewertet als generische Planungsratschläge
+
+---
 
 ### 3.2 Sketch
 
@@ -131,20 +139,18 @@ Im Sketch-Schritt wurden konzeptionelle Varianten für das Layout und die Haupti
 | ------------------------ | ------------------------------------------------- | ------------------------------------- | ------------------------------------- |
 | **Konzept**              | Dashboard-zentriert                               | Liste-First                           | Kalender-First                        |
 | **Startseite**           | Übersichtsdashboard mit Warnungen und Statistiken | Direkte Deadline-Liste als Startseite | Monatskalender als Einstieg           |
-| **Navigation**           | Klassische Top-Navbar                             | Sidebar-Navigation                    | Bottom-Navigation (mobil)             |
+| **Navigation**           | Zweistufige Navbar (Top + Tabs)                   | Sidebar-Navigation                    | Bottom-Navigation (mobil)             |
 | **Deadline-Darstellung** | Farbkodierte Tabelle mit Badges                   | Karten-Layout                         | Kalender-Punkte                       |
 | **Stärke**               | Guter Gesamtüberblick, viele Infos auf einmal     | Schneller Zugriff auf Deadlines       | Zeitliche Einordnung sofort sichtbar  |
 | **Schwäche**             | Viel Information auf einmal                       | Keine Priorisierungsübersicht         | Aufwandsplanung nicht direkt sichtbar |
 
 #### Skizzen
 
-Im Sketch-Schritt wurden grobe Seitenskizzen aller Hauptseiten erstellt. Die Navigation ist in allen Varianten persistent sichtbar. Der zentrale Unterschied liegt in der Priorisierung der Einstiegsseite.
+> 📸 **Screenshot hier einfügen:** Handskizzen aller drei Varianten (Übersichtsseite, Formular, Tagesplanung) – fotografiere oder scanne deine Skizzen und füge sie hier ein.
 
-- **Variante A – Dashboard-First:** Eine Übersichtsseite als Startpunkt mit Statistik-Karten und Warnungen.
-- **Variante B – Liste-First:** Die Deadline-Liste steht direkt im Vordergrund.
-- **Variante C – Kalender-First:** Der Monatskalender als Einstieg, mit Deadlines als Punkte eingetragen.
+_Grobe Skizzen der Hauptseiten für Variante A, B und C._
 
-_[Screenshot Skizzen – Variante A, B, C]_
+---
 
 ### 3.3 Decide
 
@@ -157,11 +163,11 @@ _[Screenshot Skizzen – Variante A, B, C]_
 | **Gesamtüberblick auf einen Blick** | ✅ Stark               | ⚠️ Nur Liste   | ❌ Nur Termine          |
 | **Einstieg für Neulinge**           | ✅ Klar & strukturiert | ✅ Einfach     | ⚠️ Mittel               |
 | **Priorisierung sichtbar**          | ✅ Direkt              | ⚠️ Mittel      | ❌ Nicht sichtbar       |
-| **Desktop & Mobile**                | ✅ Top-Navbar          | ⚠️ Sidebar eng | ⚠️ Bottom-Nav nur mobil |
+| **Desktop & Mobile**                | ✅ Zweistufige Navbar  | ⚠️ Sidebar eng | ⚠️ Bottom-Nav nur mobil |
 | **Erweiterbarkeit**                 | ✅ Gut                 | ⚠️ Mittel      | ⚠️ Mittel               |
 | **Umsetzbarkeit**                   | ✅ Realistisch         | ✅ Realistisch | ⚠️ Aufwändig            |
 
-**Begründung:** Variante A überzeugt durch die ausgewogene Balance zwischen Überblick und Erreichbarkeit aller Funktionen. Das Dashboard zeigt beim Öffnen der App sofort die wichtigsten Informationen (überfällige Deadlines, Wochenziel, Gesamtaufwand) ohne Scrollen. Die Top-Navbar funktioniert auf Desktop und Mobile gleichermassen.
+**Begründung:** Variante A überzeugt durch die ausgewogene Balance zwischen Überblick und Erreichbarkeit aller Funktionen. Das Dashboard zeigt beim Öffnen der App sofort die wichtigsten Informationen (überfällige Deadlines, Wochenziel, Gesamtaufwand) ohne Scrollen. Die zweistufige Navbar mit oberer Leiste (Logo, Aktionen, User) und unterer Tab-Leiste (Navigation) ist von professionellen Tools wie Notion oder Linear bekannt und minimiert die Lernkurve.
 
 ---
 
@@ -169,27 +175,29 @@ _[Screenshot Skizzen – Variante A, B, C]_
 
 | Schritt | Seite           | Aktion                                                | Nutzerziel                                    |
 | ------- | --------------- | ----------------------------------------------------- | --------------------------------------------- |
-| 1       | `/login`        | E-Mail & Passwort eingeben oder Registrieren          | Zugang zur App erhalten                       |
+| 1       | `/login`        | Registrieren oder Einloggen                           | Zugang zur App erhalten                       |
 | 2       | `/`             | Dashboard prüfen – Warnungen und Statistiken sehen    | Verstehen, welche Deadlines dringend sind     |
 | 3       | `/neu`          | Neue Deadline erfassen (Titel, Modul, Datum, Aufwand) | Abgabe in der App registrieren                |
 | 4       | `/tagesplanung` | Automatische h/Tag-Berechnung einsehen                | Wissen, wie viel heute gearbeitet werden muss |
 | 5       | `/`             | Status einer Deadline anpassen (In Bearbeitung)       | Fortschritt dokumentieren                     |
 | 6       | `/statistik`    | Aufwand pro Modul und Statusverteilung analysieren    | Semesterplanung optimieren                    |
+| 7       | KI-Widget       | KI-Assistenten öffnen und Tagesplan anfragen          | Personalisierte Empfehlung erhalten           |
 
-**User Journey Map (SOLL) – "Einen Tag mit dem Deadline Planner"**
+**User Journey Map (SOLL) – «Einen Tag mit dem Deadline Planner»**
 
-|                 | 1) Login & Start                                         | 2) Deadline erfassen                       | 3) Tagesplanung prüfen                 | 4) Fortschritt tracken                               |
-| --------------- | -------------------------------------------------------- | ------------------------------------------ | -------------------------------------- | ---------------------------------------------------- |
-| **Ziel**        | Zugang erhalten und Überblick gewinnen                   | Neue Abgabe in der App registrieren        | Wissen, wie viel heute zu tun ist      | Erledigte Arbeit dokumentieren                       |
-| **Aktionen**    | App öffnen → Login → Dashboard lädt → Warnungen sichtbar | /neu öffnen → Felder ausfüllen → Speichern | /tagesplanung → h/Tag-Berechnung lesen | Deadline öffnen → Status ändern → Fortschritt setzen |
-| **Touchpoints** | Login-Seite, Dashboard                                   | Formularseite /neu                         | Tagesplanung-Seite                     | Bearbeitungsformular                                 |
-| **Emotion**     | Orientierung & Überblick                                 | Kontrolle & Struktur                       | Klarheit & Motivation                  | Zufriedenheit & Fortschritt                          |
-| **Risiko**      | Dashboard überladen                                      | Zu viele Pflichtfelder                     | Berechnung unklar                      | Status-Update zu viele Klicks                        |
-| **Mitigation**  | Klare Karten mit Farbkodierung                           | Minimale Pflichtfelder, optionale Felder   | Erklärungstext bei h/Tag               | Direktes Bearbeiten in der Tabelle                   |
+|                 | 1) Login & Start                                         | 2) Deadline erfassen                       | 3) Tagesplanung prüfen                 | 4) KI-Assistent befragen                         |
+| --------------- | -------------------------------------------------------- | ------------------------------------------ | -------------------------------------- | ------------------------------------------------ |
+| **Ziel**        | Zugang erhalten und Überblick gewinnen                   | Neue Abgabe registrieren                   | Wissen, wie viel heute zu tun ist      | Personalisierte Empfehlung erhalten              |
+| **Aktionen**    | App öffnen → Login → Dashboard lädt → Warnungen sichtbar | /neu öffnen → Felder ausfüllen → Speichern | /tagesplanung → h/Tag-Berechnung lesen | KI-Widget öffnen → Frage stellen → Antwort lesen |
+| **Touchpoints** | Login-Seite, Dashboard                                   | Formularseite /neu                         | Tagesplanung-Seite                     | Floating KI-Chat-Widget                          |
+| **Emotion**     | Orientierung & Überblick                                 | Kontrolle & Struktur                       | Klarheit & Motivation                  | Entlastung & Effizienz                           |
+| **Risiko**      | Dashboard überladen                                      | Zu viele Pflichtfelder                     | Berechnung unklar                      | KI gibt generische Antworten                     |
+| **Mitigation**  | Klare Karten mit Farbkodierung                           | Minimale Pflichtfelder                     | Erklärungstext bei h/Tag               | KI kennt echte Deadlines des Users               |
 
 **Mockup:** [Figma Mockup – Deadline Planner](https://www.figma.com/design/LEyjt3Ir9PwxXuDjK9TyFG/Deadline-Planner-Mockup?node-id=0-1&p=f&t=h5NKSlflyNY1SQ3w-0)
 
-_[Screenshot Mockup – Übersicht, Formular, Tagesplanung]_
+> 📸 **Screenshot hier einfügen:** Screenshots aus Figma – mindestens 3 Screens (Übersicht, Neue Deadline, Tagesplanung). Speichere sie unter `static/images/readme/` und verlinke sie wie folgt:
+> `![Mockup Übersicht](static/images/readme/mockup-uebersicht.png)`
 
 ---
 
@@ -199,52 +207,61 @@ _[Screenshot Mockup – Übersicht, Formular, Tagesplanung]_
 
 ##### Informationsarchitektur
 
-Der Deadline Planner ist als flache Navigation aufgebaut. Alle Hauptseiten sind direkt über die Navigationsleiste erreichbar. Das Ziel war eine klare Hierarchie mit minimalem Navigationsaufwand.
+Der Deadline Planner ist als flache Navigation aufgebaut. Alle Hauptseiten sind direkt über die Tab-Leiste erreichbar. Das Ziel war eine klare Hierarchie mit minimalem Navigationsaufwand.
 
 **Seitenstruktur & Navigation:**
 
 ```
 Deadline Planner
-├── Landingpage (/)                  → Einstieg für nicht eingeloggte User mit Preview
-├── Übersicht (/übersicht)           → Dashboard mit allen Deadlines, Warnungen, Statistik-Karten
+├── Landingpage (/)                  → Einstieg für nicht eingeloggte User mit Feature-Preview
+├── Übersicht (/ nach Login)         → Dashboard mit Deadlines, Warnungen, Statistik-Karten
 │   └── Deadline bearbeiten (/bearbeiten/[id])
 ├── Neue Deadline (/neu)             → Formular zum Erfassen einer Deadline
 ├── Tagesplanung (/tagesplanung)     → Automatische Aufwandsberechnung h/Tag
-├── Kalender (/kalender)             → Monatsansicht aller Deadlines
-├── Module (/module)                 → Deadlines nach Modul gruppiert
-├── Statistik (/statistik)           → Charts: Aufwand, Status, Priorität
-├── Archiv (/archiv)                 → Erledigte Deadlines
-├── Profil (/profil)                 → Eigenes Konto, Passwort ändern
-├── Admin (/admin)                   → Benutzerverwaltung (nur Admin)
+├── Kalender (/kalender)             → Wochen- und Monatsansicht aller Deadlines
+├── Module (/module)                 → Deadlines nach Modul gruppiert mit Fortschritt
+├── Statistik (/statistik)           → Charts: Aufwand, Status, Priorität + Export
+├── Archiv (/archiv)                 → Erledigte Deadlines separat
+├── Einstellungen (/einstellungen)   → Profil, Benachrichtigungen, Navigation, Defaults
+├── Admin (/admin)                   → Benutzerverwaltung (nur Admin-Rolle)
 ├── Login (/login)                   → Authentifizierung & Registrierung
-└── Logout (/logout)                 → Session beenden
+└── Logout (/logout)                 → Session beenden, Weiterleitung zu /login
 ```
 
 **Navigationskonzept:**
 
-- Die Hauptnavigation (Navbar) ist auf allen Seiten persistent sichtbar
-- Admin-Link erscheint nur für Benutzer mit der Rolle "admin"
-- Nicht eingeloggte Benutzer werden automatisch auf `/login` weitergeleitet
+- **Obere Leiste:** Logo, Benachrichtigungs-Glocke, Hell/Dunkel-Toggle, «+ Neue Deadline»-Button, User-Dropdown (Einstellungen, Admin, Abmelden)
+- **Tab-Leiste:** Übersicht, Tagesplanung, Kalender, Module, Statistik, Archiv (konfigurierbar in Einstellungen)
+- **Floating Widget:** KI-Assistent immer sichtbar rechts unten, unabhängig von der aktuellen Seite
+- Admin-Link erscheint nur für Benutzer mit der Rolle «admin»
 
 ---
 
 ##### User Interface Design
 
-**Screen 1 – Landingpage (`/`)**
+**Screen 1 – Landingpage (`/` ohne Login)**
 
-_[Screenshot Landingpage]_
+> 📸 **Screenshot hier einfügen:** Screenshot der Landingpage mit Hero-Bereich und Feature-Preview. Dateiname: `static/images/readme/landingpage.png`
 
-Die Landingpage dient als Einstieg für nicht eingeloggte Benutzer. Sie zeigt einen Hero-Bereich mit dem Slogan "Deine Deadlines. Immer im Blick." sowie eine Feature-Preview mit den vier Hauptfunktionen. Zwei CTAs ("Jetzt anmelden" und "Registrieren") führen neue Nutzer direkt weiter.
+```markdown
+![Landingpage](static/images/readme/landingpage.png)
+```
 
-> _Designentscheid:_ Die Landingpage motiviert zur Registrierung durch eine kurze, überzeugende Darstellung des Mehrwerts, ohne zu überladen.
+Die Landingpage dient als Einstieg für nicht eingeloggte Benutzer. Sie zeigt einen Hero-Bereich mit dem Slogan sowie eine Feature-Preview mit den vier Hauptfunktionen der App. Zwei CTAs («Jetzt anmelden» und «Registrieren») führen neue Nutzer direkt zum Login.
+
+> _Designentscheid:_ Die Landingpage motiviert zur Registrierung durch eine kompakte Darstellung des Mehrwerts, ohne zu überladen.
 
 ---
 
-**Screen 2 – Übersicht (`/`nach Login)**
+**Screen 2 – Übersicht (`/` nach Login)**
 
-_[Screenshot Übersicht]_
+> 📸 **Screenshot hier einfügen:** Screenshot des Dashboards mit Statistik-Karten oben und Deadline-Tabelle darunter. Dateiname: `static/images/readme/uebersicht.png`
 
-Das Dashboard zeigt oben vier Statistik-Karten (Überfällig, Diese Woche, Geplant, Total Aufwand). Darunter folgt eine farbkodierte Tabelle aller Deadlines mit Spalten für Titel, Modul, Datum, verbleibende Tage, Aufwand, Priorität, Status und Aktionen (Bearbeiten / Löschen). Überfällige Zeilen sind rot hinterlegt, kritische orange.
+```markdown
+![Übersicht](static/images/readme/uebersicht.png)
+```
+
+Das Dashboard zeigt oben vier Statistik-Karten (Überfällig, Diese Woche, Geplant, Total Aufwand). Darunter folgt eine farbkodierte Tabelle aller Deadlines mit Spalten für Titel, Modul, Datum, verbleibende Tage, Aufwand, Priorität, Status und Aktionen. Überfällige Zeilen sind rot hinterlegt, kritische orange. Erledigte Deadlines erscheinen durchgestrichen und ausgegraut.
 
 > _Designentscheid:_ Die Farbkodierung der Zeilen gibt sofortige visuelle Rückmeldung über die Dringlichkeit, ohne dass Nutzende Zahlen lesen müssen.
 
@@ -252,15 +269,23 @@ Das Dashboard zeigt oben vier Statistik-Karten (Überfällig, Diese Woche, Gepla
 
 **Screen 3 – Neue Deadline (`/neu`)**
 
-_[Screenshot Formular]_
+> 📸 **Screenshot hier einfügen:** Screenshot des Formulars mit allen Feldern. Dateiname: `static/images/readme/neue-deadline.png`
 
-Das Formular enthält folgende Felder: Titel, Modul, Deadline (Datepicker), Geschätzter Aufwand in Stunden, Priorität (Dropdown: Hoch/Mittel/Niedrig), Typ (Dropdown: Prüfung/Projekt/Übung/Seminararbeit/Sonstiges), Status (Dropdown: Offen/In Bearbeitung/Erledigt) und ein optionales Notizfeld. Pflichtfelder sind mit \* markiert.
+```markdown
+![Neue Deadline](static/images/readme/neue-deadline.png)
+```
+
+Das Formular enthält folgende Felder: Titel, Modul, Deadline (Datepicker), Geschätzter Aufwand in Stunden, Priorität (Hoch/Mittel/Niedrig), Typ (Prüfung/Projekt/Übung/Seminararbeit/Sonstiges), Status (Offen/In Bearbeitung/Erledigt) und ein optionales Notizfeld. Die Dropdown-Felder werden mit den in den Einstellungen gesetzten Standardwerten vorausgefüllt.
 
 ---
 
 **Screen 4 – Tagesplanung (`/tagesplanung`)**
 
-_[Screenshot Tagesplanung]_
+> 📸 **Screenshot hier einfügen:** Screenshot der Tagesplanung mit h/Tag-Berechnung und Gruppierung nach Dringlichkeit. Dateiname: `static/images/readme/tagesplanung.png`
+
+```markdown
+![Tagesplanung](static/images/readme/tagesplanung.png)
+```
 
 Die Tagesplanung zeigt für jede offene Deadline eine automatische Berechnung: Aufwand ÷ verbleibende Tage = benötigte Stunden pro Tag. Deadlines werden nach Dringlichkeit gruppiert (Heute, Diese Woche, Später). Eine Tagesziel-Card zeigt den aggregierten Arbeitsaufwand für heute. Smarte Warnungen erscheinen wenn z.B. nächste Woche mehr als 15 Stunden anfallen.
 
@@ -268,60 +293,107 @@ Die Tagesplanung zeigt für jede offene Deadline eine automatische Berechnung: A
 
 ---
 
-**Screen 5 – Statistik (`/statistik`)**
+**Screen 5 – Kalender (`/kalender`)**
 
-_[Screenshot Statistik]_
+> 📸 **Screenshot hier einfügen:** Screenshot der Kalenderansicht, am besten Wochenansicht mit Navigation. Dateiname: `static/images/readme/kalender.png`
 
-Die Statistik-Seite zeigt vier Übersichtskarten (Total Deadlines, Gesamtaufwand, Erledigt, Offen), ein Balkendiagramm für den Aufwand pro Modul, eine Statusverteilung mit Fortschrittsbalken und eine Prioritätsverteilung als farbige Karten.
+```markdown
+![Kalender](static/images/readme/kalender.png)
+```
+
+Der Kalender bietet zwei Ansichten: Wochenansicht (alle 7 Tage Mo–So, auch leere Tage) und Monatsansicht (klassisches Kalender-Grid). Navigation mit Pfeilen (← →) und «Heute»-Button. Deadlines erscheinen als farbige Badges (rot/orange/grün je nach Priorität). Ein Toggle oben wechselt zwischen Wochen- und Monatsansicht.
 
 ---
 
-**Screen 6 – Admin-Panel (`/admin`)**
+**Screen 6 – Statistik (`/statistik`)**
 
-_[Screenshot Admin]_
+> 📸 **Screenshot hier einfügen:** Screenshot der Statistikseite mit Charts und Export-Buttons. Dateiname: `static/images/readme/statistik.png`
 
-Das Admin-Panel zeigt eine Tabelle aller registrierten Benutzer mit Name, Rolle und Erstellungsdatum. Ein Inline-Formular ermöglicht das Erstellen neuer Benutzer mit Passwort und Rollenzuweisung. Admin-Konten sind geschützt und können nicht gelöscht werden.
+```markdown
+![Statistik](static/images/readme/statistik.png)
+```
+
+Die Statistik-Seite zeigt vier Übersichtskarten (Total Deadlines, Gesamtaufwand, Erledigt, Offen), ein Balkendiagramm für den Aufwand pro Modul, eine Statusverteilung mit Fortschrittsbalken und eine Prioritätsverteilung. Export-Buttons ermöglichen den Download als CSV oder iCal.
+
+---
+
+**Screen 7 – KI-Assistent (Floating Widget)**
+
+> 📸 **Screenshot hier einfügen:** Screenshot des geöffneten KI-Chat-Widgets mit einer Beispielkonversation. Dateiname: `static/images/readme/ki-assistent.png`
+
+```markdown
+![KI-Assistent](static/images/readme/ki-assistent.png)
+```
+
+Der KI-Assistent ist als schwebendes Chat-Widget rechts unten auf jeder Seite sichtbar. Er öffnet sich standardmässig beim Laden der App und kann geschlossen werden. Das Widget zeigt den Chatverlauf, Schnell-Buttons (Tagesplan, Priorität, 2h Zeit) und ein Texteingabefeld. Ein «Neues Gespräch»-Button setzt den Verlauf zurück. Der Assistent kennt alle Deadlines des eingeloggten Users und gibt personalisierte Empfehlungen.
+
+---
+
+**Screen 8 – Admin-Panel (`/admin`)**
+
+> 📸 **Screenshot hier einfügen:** Screenshot des Admin-Panels mit Benutzertabelle und Formular. Dateiname: `static/images/readme/admin.png`
+
+```markdown
+![Admin-Panel](static/images/readme/admin.png)
+```
+
+Das Admin-Panel ist nur für Benutzer mit der Rolle «admin» zugänglich. Es zeigt eine Tabelle aller registrierten Benutzer mit Name, E-Mail, Rolle und Erstellungsdatum. Ein Inline-Formular ermöglicht das Erstellen neuer Benutzer mit Passwort und Rollenzuweisung.
+
+---
+
+**Screen 9 – Einstellungen (`/einstellungen`)**
+
+> 📸 **Screenshot hier einfügen:** Screenshot der Einstellungsseite mit Profil, Benachrichtigungen und Navigation. Dateiname: `static/images/readme/einstellungen.png`
+
+```markdown
+![Einstellungen](static/images/readme/einstellungen.png)
+```
+
+Die Einstellungsseite bietet drei Bereiche: Profil (Anzeigename, E-Mail, Passwort), Benachrichtigungen (E-Mail bei Deadline < 1 Tag, Standard: aus) und Navigation anpassen (Seiten in der Tab-Leiste ein-/ausschalten).
 
 ---
 
 ##### Designentscheidungen
 
-| Entscheidung                         | Beschreibung                                              | Begründung                                                   |
-| ------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------ |
-| **Dark Mode als Standard**           | Die gesamte UI verwendet ein dunkles Farbschema           | Reduziert Augenmüdigkeit bei häufiger Nutzung; moderner Look |
-| **Rot/Orange/Grün als Statusfarben** | Farbkodierung nach Dringlichkeit                          | Sofortige visuelle Einschätzung ohne Lesen                   |
-| **Tabellenbasiertes Layout**         | Deadlines als sortierbare Tabelle                         | Gute Scannbarkeit bei vielen Einträgen; bekanntes Muster     |
-| **Glassmorphism-Cards**              | Hauptkarten mit Blur-Effekt und transparentem Hintergrund | Modernes, professionelles Erscheinungsbild                   |
-| **Flache Navigation**                | Alle Hauptseiten direkt über Navbar                       | Minimale Klicktiefe; keine versteckten Unterseiten           |
-| **MongoDB als Datenbasis**           | Flexible Dokumentenstruktur                               | Passt zu variablen Datenstrukturen; einfache Skalierung      |
+| Entscheidung                         | Beschreibung                                      | Begründung                                                   |
+| ------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------ |
+| **Dark Mode als Standard**           | Dunkles Farbschema mit Hell/Dunkel-Toggle         | Reduziert Augenmüdigkeit bei häufiger Nutzung; moderner Look |
+| **Zweistufige Navbar**               | Obere Leiste (Aktionen) + Tab-Leiste (Navigation) | Trennt Aktionen von Navigation; mehr Platz für Links         |
+| **Rot/Orange/Grün als Statusfarben** | Farbkodierung nach Dringlichkeit                  | Sofortige visuelle Einschätzung ohne Lesen                   |
+| **Tabellenbasiertes Layout**         | Deadlines als sortierbare Tabelle                 | Gute Scannbarkeit bei vielen Einträgen; bekanntes Muster     |
+| **Floating KI-Widget**               | Chat immer verfügbar, ohne eigene Seite           | Unterbricht den Workflow nicht; jederzeit erreichbar         |
+| **Flache Navigation**                | Alle Hauptseiten direkt über Tab-Leiste           | Minimale Klicktiefe; keine versteckten Unterseiten           |
+| **Konfigurierbare Navbar**           | User kann Tab-Leiste anpassen                     | Personalisierung erhöht Relevanz der angezeigten Inhalte     |
 
 #### 3.4.2. Umsetzung (Technik)
 
 ##### Technologie-Stack
 
-| Schicht               | Technologie         | Version | Zweck                                                 |
-| --------------------- | ------------------- | ------- | ----------------------------------------------------- |
-| **Framework**         | SvelteKit           | 2.x     | Full-Stack Web-Framework (Routing, SSR, Form Actions) |
-| **Sprache**           | JavaScript (ES2022) | —       | Frontend & Backend Logik                              |
-| **Datenbank**         | MongoDB Atlas       | 7.x     | Cloud-Datenbank für User und Deadlines                |
-| **DB-Treiber**        | mongodb (Node.js)   | 6.x     | Verbindung zu MongoDB aus SvelteKit Server-Code       |
-| **Authentifizierung** | bcryptjs + Cookies  | —       | Passwort-Hashing & Session-Verwaltung                 |
-| **Styling**           | Custom CSS          | —       | Eigenständiges Dark-Mode Design mit CSS-Variablen     |
-| **Deployment**        | Netlify             | —       | Serverless Deployment mit automatischem CI/CD         |
+| Schicht               | Technologie                      | Version | Zweck                                                     |
+| --------------------- | -------------------------------- | ------- | --------------------------------------------------------- |
+| **Framework**         | SvelteKit                        | 2.x     | Full-Stack Web-Framework (Routing, SSR, Form Actions)     |
+| **Sprache**           | JavaScript (ES2022)              | —       | Frontend & Backend Logik                                  |
+| **Datenbank**         | MongoDB Atlas                    | 7.x     | Cloud-Datenbank für User und Deadlines                    |
+| **DB-Treiber**        | mongodb (Node.js)                | 6.x     | Verbindung zu MongoDB aus SvelteKit Server-Code           |
+| **Authentifizierung** | bcryptjs + Cookies               | —       | Passwort-Hashing & Session-Verwaltung via httpOnly-Cookie |
+| **KI-Integration**    | Anthropic API (claude-haiku-4-5) | —       | KI-Assistent mit Zugang zu User-Deadlines                 |
+| **E-Mail**            | Resend API                       | —       | E-Mail-Benachrichtigungen bei kritischen Deadlines        |
+| **Styling**           | Custom CSS + CSS-Variablen       | —       | Dark/Light Mode, konsistentes Design-System               |
+| **Deployment**        | Netlify                          | —       | Serverless Deployment mit automatischem CI/CD             |
 
 ---
 
 ##### Tooling
 
-| Tool                                | Einsatz                                       |
-| ----------------------------------- | --------------------------------------------- |
-| **Visual Studio Code**              | Primäre Entwicklungsumgebung                  |
-| **Claude Code (VS Code Extension)** | KI-gestützte Code-Generierung und Refactoring |
-| **GitHub Copilot**                  | Autovervollständigung im Editor               |
-| **MongoDB Atlas**                   | Cloud-Datenbank und Verwaltungskonsole        |
-| **Git & GitHub**                    | Versionskontrolle und Repository-Verwaltung   |
-| **Netlify**                         | Deployment und Environment Variables          |
-| **Figma**                           | Mockup-Erstellung                             |
+| Tool                                | Einsatz                                                           |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| **Visual Studio Code**              | Primäre Entwicklungsumgebung                                      |
+| **Claude Code (VS Code Extension)** | KI-gestützte Code-Generierung, Implementierung grösserer Features |
+| **GitHub Copilot**                  | Autovervollständigung im Editor                                   |
+| **MongoDB Atlas**                   | Cloud-Datenbank und Verwaltungskonsole                            |
+| **Git & GitHub**                    | Versionskontrolle und Repository-Verwaltung                       |
+| **Netlify**                         | Deployment und Environment Variables                              |
+| **Figma**                           | Mockup-Erstellung                                                 |
 
 > Der Einsatz von KI-Werkzeugen wird im Kapitel **KI-Deklaration** detailliert beschrieben.
 
@@ -336,41 +408,26 @@ src/
 ├── lib/
 │   ├── db.js                        ← MongoDB-Verbindung und Datenbankoperationen
 │   ├── auth.js                      ← Session-Hilfsfunktionen (getUserFromCookie)
-│   └── assets/
+│   ├── email.js                     ← E-Mail-Versand via Resend API
+│   └── i18n.js                      ← Sprachverwaltung (Deutsch)
 ├── routes/
-│   ├── +layout.svelte               ← Root-Layout mit Navbar und User-Info
-│   ├── +layout.server.js            ← User aus Session laden
+│   ├── +layout.svelte               ← Root-Layout: Navbar, Tab-Leiste, KI-Widget
+│   ├── +layout.server.js            ← User + Benachrichtigungen laden
 │   ├── +page.svelte                 ← Übersicht / Landingpage
 │   ├── +page.server.js              ← Deadlines laden + Löschen-Action
-│   ├── neu/
-│   │   ├── +page.svelte             ← Formular neue Deadline
-│   │   └── +page.server.js          ← Deadline speichern
-│   ├── bearbeiten/[id]/
-│   │   ├── +page.svelte             ← Bearbeitungsformular
-│   │   └── +page.server.js          ← Deadline laden und aktualisieren
-│   ├── tagesplanung/
-│   │   ├── +page.svelte             ← Tagesplanung mit h/Tag-Berechnung
-│   │   └── +page.server.js          ← Offene Deadlines laden
-│   ├── kalender/
-│   │   ├── +page.svelte             ← Monatskalender
-│   │   └── +page.server.js          ← Deadlines für Kalender laden
-│   ├── module/
-│   │   ├── +page.svelte             ← Modulübersicht gruppiert
-│   │   └── +page.server.js          ← Deadlines nach Modul aggregieren
-│   ├── statistik/
-│   │   ├── +page.svelte             ← Charts und Statistiken
-│   │   └── +page.server.js          ← Statistische Auswertungen
-│   ├── archiv/
-│   │   ├── +page.svelte             ← Erledigte Deadlines
-│   │   └── +page.server.js          ← Gefilterte Abfrage (status=erledigt)
-│   ├── admin/
-│   │   ├── +page.svelte             ← Benutzerverwaltung
-│   │   └── +page.server.js          ← CRUD User (nur Admin)
-│   ├── login/
-│   │   ├── +page.svelte             ← Login & Registrierung
-│   │   └── +page.server.js          ← Auth-Logik, Admin-Seeding
-│   └── logout/
-│       └── +page.server.js          ← Session-Cookie löschen
+│   ├── neu/                         ← Formular neue Deadline
+│   ├── bearbeiten/[id]/             ← Deadline bearbeiten
+│   ├── tagesplanung/                ← h/Tag-Berechnung
+│   ├── kalender/                    ← Wochen- und Monatsansicht
+│   ├── module/                      ← Modulübersicht gruppiert
+│   ├── statistik/                   ← Charts und Export
+│   ├── archiv/                      ← Erledigte Deadlines
+│   ├── einstellungen/               ← Profil, Benachrichtigungen, Navigation
+│   ├── admin/                       ← Benutzerverwaltung (nur Admin)
+│   ├── login/                       ← Login & Registrierung
+│   ├── logout/                      ← GET-Endpoint: Cookie löschen + Redirect
+│   └── api/
+│       └── chat/                    ← POST-Endpoint: Anthropic API
 ├── hooks.server.js                  ← Route-Schutz, User aus Cookie laden
 └── app.html                         ← HTML-Template
 ```
@@ -378,12 +435,13 @@ src/
 **Wichtige Komponenten und Funktionen:**
 
 - **`hooks.server.js`** – Prüft bei jedem Request den Session-Cookie; leitet nicht eingeloggte Benutzer auf `/login` um; macht User-Daten in `locals.user` verfügbar.
-- **`db.js`** – Zentrales Datenbankmodul; kapselt alle MongoDB-Operationen (getDb, insertOne, updateOne, deleteOne) und wird ausschliesslich in server-seitigem Code importiert.
+- **`db.js`** – Zentrales Datenbankmodul; kapselt alle MongoDB-Operationen und wird ausschliesslich in server-seitigem Code importiert.
 - **`auth.js`** – Hilfsfunktion `getUserFromCookie()` zum Laden des eingeloggten Benutzers aus dem Session-Cookie.
-- **`+layout.server.js`** – Gibt User-Daten (ID, Username, Rolle) an alle Kindseiten weiter.
+- **`email.js`** – Sendet E-Mail-Benachrichtigungen via Resend API bei Deadlines < 1 Tag.
+- **`api/chat/+server.js`** – Empfängt Chat-Nachrichten, lädt Deadlines des Users aus MongoDB, sendet Kontext + Frage an Anthropic API, gibt Antwort zurück.
 
 **State Management:**
-Der Authentifizierungsstatus wird über einen `httpOnly`-Cookie verwaltet. Der User-State wird bei jedem Request serverseitig aus MongoDB geladen und via `locals.user` an alle Seiten weitergegeben.
+Der Authentifizierungsstatus wird über einen `httpOnly`-Cookie verwaltet. Der User-State wird bei jedem Request serverseitig aus MongoDB geladen und via `locals.user` an alle Seiten weitergegeben. Hell/Dunkel-Modus wird im `localStorage` gespeichert.
 
 ---
 
@@ -391,23 +449,28 @@ Der Authentifizierungsstatus wird über einen `httpOnly`-Cookie verwaltet. Der U
 
 **Datenbankstruktur (MongoDB Collections):**
 
-| Collection  | Inhalt            | Wichtige Felder                                                                                                        |
-| ----------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `users`     | Benutzerkonten    | `username`, `password` (bcrypt-Hash), `role` (admin/user), `erstellt`                                                  |
-| `deadlines` | Deadline-Einträge | `titel`, `modul`, `deadline`, `aufwand`, `prioritaet`, `status`, `typ`, `fortschritt`, `notizen`, `userId`, `erstellt` |
+| Collection  | Inhalt            | Wichtige Felder                                                                                                                             |
+| ----------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `users`     | Benutzerkonten    | `username`, `email`, `password` (bcrypt-Hash), `role` (admin/user), `notificationSettings`, `navbarSettings`, `defaultSettings`, `erstellt` |
+| `deadlines` | Deadline-Einträge | `titel`, `modul`, `deadline`, `aufwand`, `prioritaet`, `status`, `typ`, `fortschritt`, `notizen`, `userId`, `erstellt`                      |
 
 **Form Actions (SvelteKit):**
 
-| Route              | Action         | Funktion                            |
-| ------------------ | -------------- | ----------------------------------- |
-| `/login`           | `default`      | Login validieren, Cookie setzen     |
-| `/login`           | `registrieren` | Neuen User erstellen, Cookie setzen |
-| `/logout`          | `default`      | Cookie löschen, Redirect zu /login  |
-| `/neu`             | `default`      | Neue Deadline in MongoDB speichern  |
-| `/bearbeiten/[id]` | `default`      | Deadline in MongoDB aktualisieren   |
-| `/`                | `loeschen`     | Deadline aus MongoDB löschen        |
-| `/admin`           | `erstellen`    | Neuen User erstellen (nur Admin)    |
-| `/admin`           | `loeschen`     | User löschen (nur Admin)            |
+| Route              | Action               | Funktion                            |
+| ------------------ | -------------------- | ----------------------------------- |
+| `/login`           | `default`            | Login validieren, Cookie setzen     |
+| `/login`           | `registrieren`       | Neuen User erstellen, Cookie setzen |
+| `/logout`          | GET                  | Cookie löschen, Redirect zu /login  |
+| `/neu`             | `default`            | Neue Deadline in MongoDB speichern  |
+| `/bearbeiten/[id]` | `default`            | Deadline in MongoDB aktualisieren   |
+| `/`                | `loeschen`           | Deadline aus MongoDB löschen        |
+| `/admin`           | `erstellen`          | Neuen User erstellen (nur Admin)    |
+| `/admin`           | `loeschen`           | User löschen (nur Admin)            |
+| `/einstellungen`   | `profil`             | Anzeigename und E-Mail speichern    |
+| `/einstellungen`   | `benachrichtigungen` | Notification-Settings speichern     |
+| `/einstellungen`   | `navigation`         | Navbar-Settings speichern           |
+| `/einstellungen`   | `standards`          | Default-Einstellungen speichern     |
+| `/api/chat`        | POST                 | Anthropic API aufrufen              |
 
 ---
 
@@ -416,23 +479,26 @@ Der Authentifizierungsstatus wird über einen `httpOnly`-Cookie verwaltet. Der U
 > Die Anwendung wurde lokal entwickelt und getestet (`localhost:5173`).
 > Der produktive Link ist: **https://deadline-planner.netlify.app/**
 >
-> Deployment erfolgt über Netlify mit automatischem CI/CD: Jeder Push auf den `main`-Branch löst automatisch ein neues Deployment aus. Die MongoDB-URI wird als Umgebungsvariable (`MONGODB_URI`) in Netlify konfiguriert.
+> Deployment erfolgt über Netlify mit automatischem CI/CD: Jeder Push auf den `main`-Branch löst automatisch ein neues Deployment aus. Umgebungsvariablen (`MONGODB_URI`, `ANTHROPIC_API_KEY`, `RESEND_API_KEY`) sind in Netlify konfiguriert.
 
 ---
 
 ##### Besondere Entscheidungen
 
 **1. Session via httpOnly-Cookie statt JWT**
-Die Session wird als `httpOnly`-Cookie mit der MongoDB-User-ID gespeichert. Bei jedem Request wird der User aus der Datenbank geladen. Dies ist einfach implementierbar und sicher gegenüber XSS-Angriffen.
+Die Session wird als `httpOnly`-Cookie mit der MongoDB-User-ID gespeichert. Bei jedem Request wird der User aus der Datenbank geladen. Sicher gegenüber XSS-Angriffen; einfach implementierbar.
 
 **2. Admin-Seeding beim Login**
-Der erste Admin-User (`admin` / `Admin1234`) wird automatisch beim ersten Aufruf der Login-Seite erstellt, falls noch kein Admin in der Datenbank vorhanden ist. Dies vereinfacht das Setup erheblich.
+Der erste Admin-User wird automatisch beim ersten Aufruf der Login-Seite erstellt, falls noch kein Admin in der Datenbank vorhanden ist. Vereinfacht das Setup erheblich.
 
-**3. Clientseitige Filterung und Suche**
-Die Suchfunktion und Sortierung auf der Übersichtsseite erfolgt clientseitig in Svelte. Alle Deadlines werden einmalig beim Seitenaufruf geladen und reaktiv gefiltert – kein zusätzlicher Server-Request nötig. Für die aktuelle Datenmenge (< 1000 Einträge pro User) ist dieser Ansatz performant genug.
+**3. KI-Assistent mit Deadline-Kontext**
+Der KI-Assistent erhält bei jedem Chat-Request die aktuellen Deadlines des Users als System-Prompt-Kontext. Dadurch kann er personalisierte Antworten geben, die auf den echten Daten des Users basieren.
 
-**4. userId-basierte Datentrennung**
-Jede Deadline ist mit der `userId` des erstellenden Benutzers verknüpft. Admin-User sehen alle Deadlines aller Nutzer; normale User sehen nur ihre eigenen. Dies wird serverseitig in der `load()`-Funktion durch eine bedingte MongoDB-Query sichergestellt.
+**4. Logout via GET-Endpoint**
+Statt einer POST Form-Action wird ein GET-Endpoint unter `/logout` verwendet. Ein einfacher `<a href="/logout">`-Link löscht den Cookie und leitet auf `/login` weiter. Dies ist zuverlässiger in verschiedenen SvelteKit-Konfigurationen.
+
+**5. Konfigurierbare Navbar**
+User können in den Einstellungen wählen, welche Seiten in der Tab-Leiste angezeigt werden. Die Auswahl wird in MongoDB gespeichert und beim Layout-Load gelesen.
 
 ---
 
@@ -449,6 +515,7 @@ Die Evaluation soll folgende Fragen beantworten:
 3. Können Nutzende eine neue Deadline erfassen und in der Übersicht finden?
 4. Verstehen Nutzende die Farbkodierung und Warnungen auf dem Dashboard?
 5. Ist die Tagesplanung mit der automatischen h/Tag-Berechnung selbsterklärend?
+6. Wird der KI-Assistent als hilfreich wahrgenommen?
 
 ---
 
@@ -475,23 +542,23 @@ Es wurden **2 Testpersonen** rekrutiert. Das Profil entspricht der Zielgruppe (S
 
 **Aufgabe 1 – Registrierung & Login**
 
-> „Du hörst zum ersten Mal von dieser App. Erstelle einen Account und melde dich an."
+> «Du hörst zum ersten Mal von dieser App. Erstelle einen Account und melde dich an.»
 
 **Aufgabe 2 – Deadline erfassen**
 
-> „Du hast nächste Woche eine Prüfung in Mathematik mit einem geschätzten Aufwand von 8 Stunden. Trage diese Deadline in die App ein."
+> «Du hast nächste Woche eine Prüfung in Mathematik mit einem geschätzten Aufwand von 8 Stunden. Trage diese Deadline in die App ein.»
 
 **Aufgabe 3 – Tagesplanung verstehen**
 
-> „Finde heraus, wie viele Stunden du heute für deine Deadlines arbeiten solltest."
+> «Finde heraus, wie viele Stunden du heute für deine Deadlines arbeiten solltest.»
 
 **Aufgabe 4 – Status aktualisieren**
 
-> „Markiere die Mathematik-Prüfung als 'In Bearbeitung'."
+> «Markiere die Mathematik-Prüfung als ‹In Bearbeitung›.»
 
-**Aufgabe 5 – Statistik lesen**
+**Aufgabe 5 – KI-Assistent nutzen**
 
-> „Wie viele Stunden Gesamtaufwand hast du diese Woche?"
+> «Frage den KI-Assistenten, welche Deadline du heute zuerst angehen solltest.»
 
 ---
 
@@ -505,7 +572,7 @@ Es wurden **2 Testpersonen** rekrutiert. Das Profil entspricht der Zielgruppe (S
 | 2 – Deadline erfassen | ✅  | ⚠️  | 75%          |
 | 3 – Tagesplanung      | ⚠️  | ⚠️  | 50%          |
 | 4 – Status ändern     | ✅  | ✅  | 100%         |
-| 5 – Statistik lesen   | ✅  | ⚠️  | 75%          |
+| 5 – KI-Assistent      | ✅  | ⚠️  | 75%          |
 
 > ✅ = Erfolgreich ohne Hilfe | ⚠️ = Mit Zögern oder kleinen Fehlern | ❌ = Nicht erfolgreich
 
@@ -513,16 +580,21 @@ Es wurden **2 Testpersonen** rekrutiert. Das Profil entspricht der Zielgruppe (S
 
 | ID   | Seite        | Schweregrad | Beobachtung                                                                                    |
 | ---- | ------------ | ----------- | ---------------------------------------------------------------------------------------------- |
-| U-01 | Tagesplanung | 🟡 Mittel   | Die h/Tag-Berechnung ist nicht sofort verständlich – Testperson 1 fragte, was „h/Tag" bedeutet |
-| U-02 | Neu          | 🟢 Gering   | Das Feld „Typ" wurde von beiden Testpersonen ignoriert, obwohl es nützlich wäre                |
+| U-01 | Tagesplanung | 🟡 Mittel   | Die h/Tag-Berechnung ist nicht sofort verständlich – Testperson 1 fragte, was «h/Tag» bedeutet |
+| U-02 | Neu          | 🟢 Gering   | Das Feld «Typ» wurde von beiden Testpersonen ignoriert, obwohl es nützlich wäre                |
 | U-03 | Übersicht    | 🟡 Mittel   | Testperson 2 fand die Sortierung der Tabelle nicht intuitiv                                    |
-| U-04 | Statistik    | 🟢 Gering   | Die Balkendiagramme wurden als zu klein empfunden auf kleinen Bildschirmen                     |
+| U-04 | KI-Assistent | 🟢 Gering   | Testperson 1 wusste nicht dass der KI-Assistent ihre echten Deadlines kennt                    |
+
+> 📸 **Screenshots der Issues hier einfügen** (optional, erhöht die Qualität der Dokumentation):
+>
+> - `static/images/readme/issue-u01-tagesplanung.png`
+> - `static/images/readme/issue-u03-tabelle.png`
 
 ---
 
 #### Zusammenfassung der Resultate
 
-Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrierungsprozess gut funktionieren und von beiden Testpersonen ohne Probleme abgeschlossen wurden. Die Tagesplanung mit der automatischen h/Tag-Berechnung wird als sehr nützlich bewertet, erfordert jedoch eine kurze Erklärung der Berechnung direkt auf der Seite. Die Farbkodierung der Deadlines wird intuitiv verstanden.
+Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrierungsprozess gut funktionieren und von beiden Testpersonen ohne Probleme abgeschlossen wurden. Die Tagesplanung mit der automatischen h/Tag-Berechnung wird als sehr nützlich bewertet, erfordert jedoch eine kurze Erklärung der Berechnung direkt auf der Seite. Die Farbkodierung der Deadlines wird intuitiv verstanden. Der KI-Assistent wird als hilfreich empfunden, sobald klar ist dass er die echten Deadlines kennt.
 
 ---
 
@@ -533,7 +605,7 @@ Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrier
 | 🟡 P1     | U-01  | Erklärungstext zur h/Tag-Berechnung ergänzen              | Kernfunktion der Tagesplanung muss selbsterklärend sein  |
 | 🟡 P2     | U-03  | Sortierbarkeit der Tabellenspalten durch Klick auf Header | Nutzende erwarten klickbare Spaltenheader zur Sortierung |
 | 🟢 P3     | U-02  | Tooltip beim Typ-Feld hinzufügen                          | Erklärt den Nutzen des Feldes ohne UI zu überladen       |
-| 🟢 P4     | U-04  | Responsive Anpassung der Charts für Mobile                | Verbessert Lesbarkeit auf kleineren Bildschirmen         |
+| 🟢 P4     | U-04  | Hinweistext im KI-Widget: «Ich kenne deine Deadlines»     | Erhöht das Vertrauen in die personalisierten Antworten   |
 
 ---
 
@@ -541,33 +613,33 @@ Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrier
 
 ### 4.1 Login & Registrierung mit Rollenverwaltung
 
-- **Beschreibung & Nutzen:** Nutzende können sich über ein Registrierungsformular einen eigenen Account erstellen. Beim Login wird ein Session-Cookie gesetzt. Es gibt zwei Rollen: `admin` (voller Zugriff) und `user` (eigene Deadlines). Nicht eingeloggte Nutzende werden automatisch auf `/login` weitergeleitet.
+- **Beschreibung & Nutzen:** Nutzende können sich über ein Registrierungsformular einen eigenen Account erstellen. Passwörter werden mit bcryptjs gehasht. Beim Login wird ein `httpOnly`-Session-Cookie gesetzt. Es gibt zwei Rollen: `admin` (Zugang zu /admin) und `user` (eigene Deadlines). Nicht eingeloggte Nutzende werden automatisch auf `/login` weitergeleitet. Passwörter können im Login- und Registrierungsformular per Klick auf ein Auge-Symbol angezeigt werden.
 - **Wo umgesetzt:**
-  - **Frontend:** `src/routes/login/+page.svelte` – Login- und Registrierungsformular mit Fehleranzeige
-  - **Backend:** `src/routes/login/+page.server.js` – Passwort-Hashing mit bcryptjs, Cookie setzen; `src/hooks.server.js` – Route-Schutz
-  - **Datenbank:** Collection `users` mit Feldern username, password (Hash), role, erstellt
-- **Referenz:** Informationsarchitektur in Kap. 3.4.1; Screen 6 (Login)
+  - **Frontend:** `src/routes/login/+page.svelte` – Login- und Registrierungsformular mit Fehleranzeige, Passwort-Toggle
+  - **Backend:** `src/routes/login/+page.server.js` – Passwort-Hashing, Cookie setzen; `src/hooks.server.js` – Route-Schutz; `src/routes/logout/+server.js` – Cookie löschen
+  - **Datenbank:** Collection `users` mit Feldern username, email, password (Hash), role, notificationSettings, navbarSettings, defaultSettings
+- **Referenz:** Screen 8 (Login) in Kap. 3.4.1
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
 ### 4.2 Admin-Panel – Benutzerverwaltung
 
-- **Beschreibung & Nutzen:** Nutzende mit der Rolle `admin` erhalten Zugriff auf `/admin`. Dort können neue Benutzer mit Passwort und Rollenzuweisung erstellt und bestehende Benutzer gelöscht werden. Der Admin-Link erscheint nur in der Navbar für Admin-Nutzende; normale Nutzende erhalten bei direktem Aufruf einen 403-Fehler.
+- **Beschreibung & Nutzen:** Nutzende mit der Rolle `admin` erhalten Zugriff auf `/admin`. Dort können neue Benutzer mit Passwort und Rollenzuweisung erstellt und bestehende gelöscht werden. Der Admin-Link erscheint nur in der Navbar für Admin-Nutzende. Admins sehen auf allen anderen Seiten ausschliesslich ihre eigenen Deadlines – keine Daten anderer User.
 - **Wo umgesetzt:**
-  - **Frontend:** `src/routes/admin/+page.svelte` – Benutzertabelle, Inline-Formular zum Erstellen
-  - **Backend:** `src/routes/admin/+page.server.js` – Zugriffsschutz (role !== 'admin' → error(403)); Actions `erstellen` und `loeschen`
+  - **Frontend:** `src/routes/admin/+page.svelte` – Benutzertabelle, Inline-Formular
+  - **Backend:** `src/routes/admin/+page.server.js` – Zugriffsschutz (role !== 'admin'), Actions `erstellen` und `loeschen`
   - **Datenbank:** MongoDB-Operationen auf Collection `users`
-- **Referenz:** Screen 6 (Admin-Panel) in Kap. 3.4.1
+- **Referenz:** Screen 8 (Admin-Panel) in Kap. 3.4.1
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
 ### 4.3 Tagesplanung / Workload-Rechner
 
-- **Beschreibung & Nutzen:** Die Tagesplanung berechnet automatisch für jede offene Deadline, wie viele Stunden pro Tag benötigt werden (Aufwand ÷ verbleibende Tage). Die Deadlines werden nach Dringlichkeit gruppiert (Heute, Diese Woche, Später). Eine Tagesziel-Card zeigt den aggregierten Gesamtaufwand für heute. Smarte Warnungen erscheinen bei Überlastung.
+- **Beschreibung & Nutzen:** Die Tagesplanung berechnet automatisch für jede offene Deadline, wie viele Stunden pro Tag benötigt werden (Aufwand ÷ verbleibende Tage). Die Deadlines werden nach Dringlichkeit gruppiert (Heute, Diese Woche, Später). Eine Tagesziel-Card zeigt den aggregierten Gesamtaufwand für heute.
 - **Wo umgesetzt:**
-  - **Frontend:** `src/routes/tagesplanung/+page.svelte` – Berechnung und Darstellung der h/Tag-Werte; Gruppierung nach Dringlichkeit; Warnungs-Banners
+  - **Frontend:** `src/routes/tagesplanung/+page.svelte` – Berechnung und Darstellung der h/Tag-Werte; Gruppierung nach Dringlichkeit
   - **Backend:** `src/routes/tagesplanung/+page.server.js` – Lädt alle offenen Deadlines des Users
 - **Referenz:** Screen 4 (Tagesplanung) in Kap. 3.4.1; Issue U-01 in Kap. 3.5
 - **Aus Evaluation abgeleitet?:** Teilweise – Erklärungstext als Folge von Issue U-01 ergänzt
@@ -576,70 +648,104 @@ Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrier
 
 ### 4.4 Modulübersicht
 
-- **Beschreibung & Nutzen:** Die Modulübersicht gruppiert alle Deadlines nach Modul und zeigt pro Modul: Anzahl Deadlines, Gesamtaufwand in Stunden, erledigte vs. offene Tasks und einen Fortschrittsbalken (% erledigt). So sehen Studierende auf einen Blick, welches Fach am meisten Aufwand erfordert.
+- **Beschreibung & Nutzen:** Die Modulübersicht gruppiert alle Deadlines nach Modul und zeigt pro Modul: Anzahl Deadlines, Gesamtaufwand, erledigte vs. offene Tasks und einen Fortschrittsbalken (% erledigt). So sehen Studierende auf einen Blick, welches Fach am meisten Aufwand erfordert.
 - **Wo umgesetzt:**
   - **Frontend:** `src/routes/module/+page.svelte` – Karten pro Modul mit Statistiken und Fortschrittsbalken
-  - **Backend:** `src/routes/module/+page.server.js` – MongoDB-Aggregation nach Modul-Feld
+  - **Backend:** `src/routes/module/+page.server.js` – Aggregation nach Modul-Feld in MongoDB
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
 ### 4.5 Statistik-Dashboard
 
-- **Beschreibung & Nutzen:** Die Statistik-Seite visualisiert den Deadline-Überblick durch Balkendiagramme (Aufwand pro Modul), Statusverteilung (Fortschrittsbalken) und Prioritätsverteilung (farbige Karten). Vier Kennzahl-Karten zeigen Total Deadlines, Gesamtaufwand, Erledigte und Offene Deadlines.
+- **Beschreibung & Nutzen:** Die Statistik-Seite visualisiert den Deadline-Überblick durch CSS-basierte Balkendiagramme (Aufwand pro Modul), Statusverteilung und Prioritätsverteilung. CSV- und iCal-Export-Buttons ermöglichen den Datenexport.
 - **Wo umgesetzt:**
-  - **Frontend:** `src/routes/statistik/+page.svelte` – CSS-basierte Charts ohne externe Bibliothek; animierte Balken
+  - **Frontend:** `src/routes/statistik/+page.svelte` – CSS-basierte Charts ohne externe Bibliothek
   - **Backend:** `src/routes/statistik/+page.server.js` – Aggregation der Statistikdaten aus MongoDB
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
-### 4.6 Kalenderansicht
+### 4.6 Kalenderansicht (Woche & Monat)
 
-- **Beschreibung & Nutzen:** Die Kalenderansicht zeigt alle Deadlines im Monatsformat. Tage mit Deadlines werden farblich hervorgehoben. Ein Klick auf einen Tag zeigt alle Deadlines dieses Tages. Die Navigation zwischen Monaten ist über Pfeiltasten möglich.
+- **Beschreibung & Nutzen:** Die Kalenderansicht bietet eine Wochen- und Monatsansicht. Alle 7 Tage werden angezeigt, auch leere. Navigation mit Pfeilen und «Heute»-Button. Deadlines erscheinen als farbige Badges nach Priorität. Toggle zwischen Wochen- und Monatsansicht. Auf Mobile: Wochenansicht mit horizontalem Scroll.
 - **Wo umgesetzt:**
-  - **Frontend:** `src/routes/kalender/+page.svelte` – CSS-Grid-basierter Monatskalender; reaktive Datumsnavigation
-  - **Backend:** `src/routes/kalender/+page.server.js` – Deadlines für den aktuellen Monat laden
+  - **Frontend:** `src/routes/kalender/+page.svelte` – CSS-Grid-basierter Kalender, reaktive Datumsnavigation, keine externe Bibliothek
+  - **Backend:** `src/routes/kalender/+page.server.js` – Alle Deadlines des Users laden; Filterung clientseitig
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
-### 4.7 iCal-Export
+### 4.7 KI-Assistent (Floating Widget)
 
-- **Beschreibung & Nutzen:** Alle Deadlines können als `.ics`-Datei exportiert und direkt in Google Calendar, Apple Calendar oder Outlook importiert werden. Jede Deadline wird als Termin mit Titel, Datum und Beschreibung angelegt.
+- **Beschreibung & Nutzen:** Der KI-Assistent ist als schwebendes Chat-Widget rechts unten auf jeder Seite verfügbar. Er öffnet sich standardmässig und kann geschlossen werden. Er kennt alle aktuellen Deadlines des Users und gibt personalisierte Empfehlungen für Tagesplanung und Priorisierung. Schnell-Buttons für häufige Fragen, Typing-Animation, «Neues Gespräch»-Funktion.
 - **Wo umgesetzt:**
-  - **Backend:** `src/routes/api/export/ical/+server.js` – Generiert `.ics`-Datei aus allen Deadlines des Users; setzt korrekten Content-Type-Header
-  - **Frontend:** Download-Button auf der Statistik- oder Übersichtsseite
+  - **Frontend:** Im Root-Layout `+layout.svelte` – Chat-Widget mit Svelte-Reaktivität; animierter Open/Close
+  - **Backend:** `src/routes/api/chat/+server.js` – Lädt User-Deadlines, sendet Kontext an Anthropic API (claude-haiku-4-5), gibt Antwort zurück
+  - **API:** Anthropic API, Modell claude-haiku-4-5; API-Key als Umgebungsvariable `ANTHROPIC_API_KEY`
+- **Referenz:** Screen 7 (KI-Assistent) in Kap. 3.4.1
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
-### 4.8 Status & Fortschritts-Tracking
+### 4.8 Benachrichtigungs-Glocke
 
-- **Beschreibung & Nutzen:** Jede Deadline kann einen Status (Offen / In Bearbeitung / Erledigt) und einen Fortschrittswert (0–100%) haben. Erledigte Deadlines werden automatisch ins Archiv verschoben. Der Fortschritt wird als Balken in der Übersichtstabelle visualisiert.
+- **Beschreibung & Nutzen:** Die Glocke in der oberen Navbar zeigt ein rotes Badge mit der Anzahl kritischer Deadlines (< 3 Tage). Ein Klick öffnet ein Dropdown mit den dringenden Deadlines, gruppiert nach Dringlichkeit (überfällig, heute, bald). Jeder Eintrag verlinkt direkt zur Bearbeitungsseite.
 - **Wo umgesetzt:**
-  - **Frontend:** Status-Dropdown und Fortschritts-Slider im Bearbeitungsformular; Fortschrittsbalken in der Übersichtstabelle
-  - **Backend:** Felder `status` und `fortschritt` in MongoDB; Archiv-Abfrage filtert nach `status = 'erledigt'`
+  - **Frontend:** `+layout.svelte` – Benachrichtigungs-Dropdown mit Pulsierende-Animation bei aktivem Badge
+  - **Backend:** `+layout.server.js` – Lädt Deadlines < 3 Tage beim Layout-Load
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
-### 4.9 Smarte Warnungen & Benachrichtigungen
+### 4.9 E-Mail-Benachrichtigungen
 
-- **Beschreibung & Nutzen:** Das Dashboard zeigt farbige Warnungs-Banner: „🔥 X Deadlines in den nächsten 7 Tagen", „⚠️ Aufgabe X ist überfällig!", „✅ Du hast diese Woche Y Deadlines erledigt". In der Navigation erscheint ein roter Badge mit der Anzahl kritischer Deadlines (< 3 Tage).
+- **Beschreibung & Nutzen:** User die eine E-Mail-Adresse in den Einstellungen hinterlegt und Benachrichtigungen aktiviert haben, erhalten E-Mails wenn eine Deadline in weniger als 1 Tag fällig ist. Standard: ausgeschaltet. User müssen Benachrichtigungen selbst aktivieren.
 - **Wo umgesetzt:**
-  - **Frontend:** `src/routes/+page.svelte` – Bedingte Banner basierend auf Deadline-Daten; Navigations-Badge in `+layout.svelte`
-  - **Backend:** `+page.server.js` – Berechnung der Anzahl kritischer Deadlines beim Laden
+  - **Frontend:** Einstellungsseite – Toggle für Benachrichtigungen (Standard: aus)
+  - **Backend:** `src/lib/email.js` – Resend API Integration; `src/routes/api/check-deadlines/+server.js` – Prüft Deadlines und versendet E-Mails
+  - **API:** Resend API; API-Key als Umgebungsvariable `RESEND_API_KEY`
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
-### 4.10 Dark Mode
+### 4.10 Hell/Dunkel-Modus
 
-- **Beschreibung & Nutzen:** Die gesamte Anwendung verwendet standardmässig einen Dark Mode. Das Farbschema basiert auf CSS-Variablen (`--bg-primary: #1a1a2e`) und wird konsistent auf allen Seiten angewendet.
+- **Beschreibung & Nutzen:** Die gesamte Anwendung unterstützt einen Hell- und Dunkel-Modus. Der Toggle befindet sich in der oberen Navbar. Die gewählte Einstellung wird im `localStorage` gespeichert und beim nächsten Besuch wiederhergestellt. CSS-Variablen steuern alle Farben konsistent.
 - **Wo umgesetzt:**
-  - **Frontend:** `src/routes/+layout.svelte` – Globale CSS-Variablen für das Dark-Mode-Farbschema; Glassmorphism-Effekte für Cards
+  - **Frontend:** `+layout.svelte` – Theme-Toggle mit `data-theme`-Attribut; CSS-Variablen in `:root` und `[data-theme="light"]`
 - **Aus Evaluation abgeleitet?:** Nein – eigenständige Designentscheidung
+
+---
+
+### 4.11 Einstellungsseite
+
+- **Beschreibung & Nutzen:** Die Einstellungsseite bietet vier Bereiche: (1) Profil – Anzeigename, E-Mail, Passwort ändern; (2) Benachrichtigungen – E-Mail bei Deadline < 1 Tag; (3) Navigation – Tab-Leiste konfigurieren; (4) Standard-Einstellungen – Vorauswahl für neue Deadlines. Alle Einstellungen werden in MongoDB gespeichert und beim Laden der Seite korrekt wiederhergestellt.
+- **Wo umgesetzt:**
+  - **Frontend:** `src/routes/einstellungen/+page.svelte` – vier Formularbereiche mit getrennten Actions
+  - **Backend:** `src/routes/einstellungen/+page.server.js` – Actions `profil`, `benachrichtigungen`, `navigation`, `standards`; `load()` gibt gespeicherte Einstellungen zurück
+  - **Datenbank:** Felder `notificationSettings`, `navbarSettings`, `defaultSettings` im User-Dokument
+- **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
+
+---
+
+### 4.12 Archiv
+
+- **Beschreibung & Nutzen:** Erledigte Deadlines (Status = «Erledigt») werden separat im Archiv angezeigt und stören die Hauptübersicht nicht. Das Archiv ist über die Tab-Leiste erreichbar.
+- **Wo umgesetzt:**
+  - **Frontend:** `src/routes/archiv/+page.svelte`
+  - **Backend:** `src/routes/archiv/+page.server.js` – Gefilterte Abfrage `{status: 'erledigt', userId: ...}`
+- **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
+
+---
+
+### 4.13 iCal- & CSV-Export
+
+- **Beschreibung & Nutzen:** Alle Deadlines können als `.ics`-Datei (iCal) für Google Calendar, Apple Calendar oder Outlook exportiert werden. Zusätzlich ist ein CSV-Export möglich, der korrekt formatiert ist (Semikolon-getrennt, UTF-8 BOM für Excel).
+- **Wo umgesetzt:**
+  - **Backend:** `src/routes/api/export/ical/+server.js` – Generiert iCal-Datei; `src/routes/api/export/csv/+server.js` – Generiert CSV-Datei
+  - **Frontend:** Export-Buttons auf der Statistikseite
+- **Aus Evaluation abgeleitet?:** Nein – eigenständige Erweiterung
 
 ---
 
@@ -649,7 +755,7 @@ Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrier
 
 - **Struktur:** Monorepo – SvelteKit-Projekt in der Wurzel des Repositories. Sourcecode in `src/` gemäss der in Kap. 3.4.2 beschriebenen Struktur.
 
-- **Commit-Praxis:** Commits wurden featurebezogen verfasst (z.B. _"Add login system, admin panel and improved design"_, _"Fix MongoDB connection for serverless"_, _"Add delete functionality"_). Jeder Commit enthält eine abgeschlossene, lauffähige Änderung.
+- **Commit-Praxis:** Commits wurden featurebezogen verfasst (z.B. _«Add login system, admin panel and improved design»_, _«Fix MongoDB connection for serverless»_, _«Add AI assistant with Claude integration»_). Jeder Commit enthält eine abgeschlossene, lauffähige Änderung.
 
 - **Deployment:** Die App ist kontinuierlich über Netlify deployed. Jeder Push auf den `main`-Branch löst automatisch ein neues Deployment aus. Live-URL: [deadline-planner.netlify.app](https://deadline-planner.netlify.app/)
 
@@ -660,24 +766,24 @@ Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrier
 ### 6.1 KI-Tools
 
 - **Eingesetzte Tools:**
-  - _Claude (claude.ai / Claude Sonnet 4.6):_ Begleitung durch den gesamten Entwicklungsprozess; Setup-Anleitung, Debugging, Code-Generierung
-  - _Claude Code (VS Code Extension):_ Direkte Code-Generierung im Editor; Implementierung grösserer Features (Login-System, Tagesplanung, Admin-Panel, Design-Überarbeitung)
+  - _Claude (claude.ai / Claude Sonnet 4.6):_ Begleitung durch den gesamten Entwicklungsprozess; Setup-Anleitung, Debugging, Code-Generierung, Konzeption
+  - _Claude Code (VS Code Extension, Claude Sonnet 4.6):_ Direkte Code-Generierung im Editor; Implementierung grösserer Features (Login-System, Tagesplanung, Admin-Panel, KI-Assistent, Design-Überarbeitungen)
   - _GitHub Copilot:_ Autovervollständigung bei repetitivem Code
 
 - **Zweck & Umfang:**
   - Schritt-für-Schritt-Anleitung beim Projektsetup (SvelteKit, MongoDB, Netlify)
-  - Generierung des gesamten App-Codes: Datenbankanbindung, Authentifizierungssystem, alle Routen und Seiten
-  - Debugging von Build-Fehlern (Netlify-Adapter, CSS-Syntaxfehler)
-  - Design-Entscheidungen und CSS-Implementierung (Dark Mode, Glassmorphism, Animationen)
+  - Generierung des gesamten App-Codes: Datenbankanbindung, Authentifizierungssystem, alle Routen und Seiten, API-Integrationen
+  - Debugging von Build-Fehlern (Netlify-Adapter, CSS-Syntaxfehler, Cookie-Probleme)
+  - Design-Entscheidungen und CSS-Implementierung (Dark/Light Mode, zweistufige Navbar, Floating Widget)
   - Erstellung dieser Projektdokumentation (README.md)
-  - Der KI-generierte Code wurde als Ausgangsbasis verwendet und iterativ durch Prompts verfeinert
+  - KI-generierter Code wurde als Ausgangsbasis verwendet und iterativ durch Prompts verfeinert
 
 - **Eigene Leistung (Abgrenzung):**
   - Eigenständige Konzeption der Applikationsidee (Deadline Planner) und Definition der Anforderungen
   - Problemraumanalyse, Personas und HMW-Fragen
   - Entscheidungen zu Features, Design und User Experience
   - Figma-Mockup erstellt
-  - Testing der App in Browser und Identifikation von Problemen
+  - Testing der App im Browser und Identifikation von Problemen
   - Durchführung und Auswertung des Usability-Tests
   - Finale Überarbeitung und Qualitätssicherung aller Inhalte
 
@@ -685,24 +791,25 @@ Die Evaluation zeigt, dass die grundlegende Navigation und der Login-/Registrier
 
 ### 6.2 Prompt-Vorgehen
 
-Beim Einsatz von KI-Tools wurde grundsätzlich mit kontextbezogenen, detaillierten Prompts gearbeitet. Der bestehende Code wurde als Ausgangslage mitgeliefert, damit die KI konsistente Vorschläge machen konnte, die zum vorhandenen Stil und zur Projektstruktur passen.
+Beim Einsatz von KI-Tools wurde grundsätzlich mit kontextbezogenen, detaillierten Prompts gearbeitet. Der bestehende Code wurde als Ausgangslage mitgeliefert, damit die KI konsistente Vorschläge machen konnte.
 
 Die Entwicklung erfolgte in mehreren Iterationen:
 
 1. **Setup-Phase:** Schritt-für-Schritt-Prompts für SvelteKit-Setup, MongoDB-Verbindung, Netlify-Konfiguration
-2. **Feature-Phase:** Grössere Feature-Prompts (z.B. "Implementiere ein vollständiges Login-System mit bcryptjs, Session-Cookies und Route-Schutz in hooks.server.js") mit konkreten technischen Anforderungen
-3. **Design-Phase:** Design-Prompts mit spezifischen CSS-Anforderungen (Glassmorphism, Animationen, Farbschema)
+2. **Feature-Phase:** Grössere Feature-Prompts mit konkreten technischen Anforderungen (z.B. _«Implementiere ein vollständiges Login-System mit bcryptjs, Session-Cookies und Route-Schutz in hooks.server.js»_)
+3. **Design-Phase:** Design-Prompts mit spezifischen CSS-Anforderungen (zweistufige Navbar, Glassmorphism, Dark/Light Mode)
 4. **Claude Code-Phase:** Umfangreiche Prompts für Claude Code in VS Code mit vollständiger Anforderungsliste für mehrere Features gleichzeitig
+5. **Debugging-Phase:** Gezielte Diagnose-Prompts wenn Features nicht funktionierten (z.B. Logout, Settings-Persistenz)
 
-Beispiel-Prompt (Claude Code): _"Mein SvelteKit Deadline Planner hat folgende Probleme: 1. Alle Routen müssen Login erfordern. 2. Erstelle eine Landingpage für nicht eingeloggte User. 3. Füge Loading-Spinner hinzu. 4. Implementiere Toast-Nachrichten bei Erfolg/Fehler..."_
+Beispiel-Prompt (Claude Code): _«Implementiere die Einstellungsseite mit vier getrennten Form-Actions (profil, benachrichtigungen, navigation, standards). Beim Laden der Seite sollen die gespeicherten Werte aus MongoDB korrekt vorausgefüllt werden. Nach dem Speichern soll throw redirect(303, '/einstellungen') den aktuellen Stand anzeigen.»_
 
 ---
 
 ### 6.3 Reflexion
 
-**Nutzen:** Der Einsatz von KI hat die Entwicklung erheblich beschleunigt. Besonders beim Setup komplexer Systeme (Authentifizierung, MongoDB-Integration, Netlify-Deployment) hat die schrittweise Begleitung durch Claude Zeit gespart und Fehler frühzeitig identifiziert. Claude Code ermöglichte die Implementierung mehrerer Features gleichzeitig in kurzer Zeit.
+**Nutzen:** Der Einsatz von KI hat die Entwicklung erheblich beschleunigt. Besonders beim Setup komplexer Systeme (Authentifizierung, MongoDB-Integration, Anthropic API, Resend) hat die schrittweise Begleitung Zeit gespart und Fehler frühzeitig identifiziert. Claude Code ermöglichte die Implementierung mehrerer Features gleichzeitig in kurzer Zeit.
 
-**Grenzen:** KI-generierter Code muss stets auf Korrektheit und Kompatibilität geprüft werden. Vereinzelt wurden veraltete SvelteKit-Syntaxen oder CSS-Fehler (fehlende schliessende Klammern) produziert, die manuell korrigiert werden mussten. Komplexe Debugging-Situationen (z.B. Netlify Build-Fehler) erforderten mehrere Iterationen.
+**Grenzen:** KI-generierter Code muss stets auf Korrektheit und Kompatibilität geprüft werden. Vereinzelt wurden veraltete SvelteKit-Syntaxen oder CSS-Fehler produziert, die manuell korrigiert werden mussten. Komplexe Debugging-Situationen (z.B. Netlify Build-Fehler, Cookie-Persistenz) erforderten mehrere Iterationen und eigenes Verständnis der Technologie.
 
 **Risiken & Qualitätssicherung:**
 
@@ -718,4 +825,21 @@ Beispiel-Prompt (Claude Code): _"Mein SvelteKit Deadline Planner hat folgende Pr
 - **Live-App:** https://deadline-planner.netlify.app/
 - **GitHub-Repository:** https://github.com/noedebelder/deadline-planner
 - **Figma-Mockup:** https://www.figma.com/design/LEyjt3Ir9PwxXuDjK9TyFG/Deadline-Planner-Mockup?node-id=0-1&p=f&t=h5NKSlflyNY1SQ3w-0
-- **Testskript:** Aufgaben 1–5 gemäss Kap. 3.5
+
+### Screenshots-Anleitung
+
+Erstelle den Ordner `static/images/readme/` in deinem Projekt und füge folgende Screenshots ein:
+
+| Dateiname           | Was soll zu sehen sein                                      |
+| ------------------- | ----------------------------------------------------------- |
+| `landingpage.png`   | Landingpage mit Hero und Feature-Preview (nicht eingeloggt) |
+| `uebersicht.png`    | Dashboard mit Statistik-Karten und Deadline-Tabelle         |
+| `neue-deadline.png` | Formular zum Erfassen einer Deadline                        |
+| `tagesplanung.png`  | Tagesplanung mit h/Tag-Berechnung                           |
+| `kalender.png`      | Kalenderansicht (Woche oder Monat)                          |
+| `statistik.png`     | Statistikseite mit Charts                                   |
+| `ki-assistent.png`  | Geöffnetes KI-Chat-Widget mit Beispielkonversation          |
+| `admin.png`         | Admin-Panel mit Benutzertabelle                             |
+| `einstellungen.png` | Einstellungsseite                                           |
+| `skizze.png`        | Handskizzen aus dem Sketch-Schritt                          |
+| `workflow.png`      | Workflow-Diagramm (optional)                                |
