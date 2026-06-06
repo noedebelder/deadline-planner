@@ -5,7 +5,6 @@
   export let data;
 
   let darkMode = false;
-  let menuOffen = false;
 
   onMount(() => {
     darkMode = document.documentElement.getAttribute("data-theme") === "dark";
@@ -16,10 +15,6 @@
     const theme = darkMode ? "dark" : "light";
     localStorage.setItem("theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
-  }
-
-  function schliessMenu() {
-    menuOffen = false;
   }
 </script>
 
@@ -37,80 +32,129 @@
   <div class="blob blob-3"></div>
 </div>
 
-<div class="app">
-  <nav>
-    <a href="/" class="nav-brand" on:click={schliessMenu}>
-      <span class="brand-icon">📅</span>
-      <span class="brand-text">Deadline Planner</span>
-    </a>
+{#if data.user}
+  <!-- ═══ EINGELOGGT: Sidebar + Inhalt ═══ -->
+  <div class="app-layout">
 
-    {#if data.user}
-      <button
-        class="hamburger"
-        class:aktiv={menuOffen}
-        on:click={() => (menuOffen = !menuOffen)}
-        aria-label="Menü"
-        type="button"
-      >
-        <span></span><span></span><span></span>
-      </button>
-    {/if}
+    <aside class="sidebar">
 
-    <div class="nav-links" class:offen={menuOffen}>
-      {#if data.user}
-        <a href="/" class:active={$page.url.pathname === "/"} on:click={schliessMenu}>
-          Übersicht
-          {#if data.baldFaellig > 0}
-            <span class="nav-badge urgent">{data.baldFaellig}</span>
-          {/if}
+      <!-- Logo -->
+      <a href="/" class="sidebar-brand" title="Deadline Planner">
+        <span class="brand-icon">📅</span>
+        <span class="brand-text">Deadline Planner</span>
+      </a>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+
+        <a href="/" title="Übersicht" class:active={$page.url.pathname === "/"}>
+          <i class="icon">
+            🏠
+            {#if data.baldFaellig > 0}
+              <span class="icon-badge">{data.baldFaellig}</span>
+            {/if}
+          </i>
+          <span class="label">
+            Übersicht
+            {#if data.baldFaellig > 0}
+              <span class="label-badge">{data.baldFaellig}</span>
+            {/if}
+          </span>
         </a>
-        <a href="/tagesplanung" class:active={$page.url.pathname === "/tagesplanung"} on:click={schliessMenu}>Tagesplanung</a>
-        <a href="/module" class:active={$page.url.pathname === "/module"} on:click={schliessMenu}>Module</a>
-        <a href="/kalender" class:active={$page.url.pathname === "/kalender"} on:click={schliessMenu}>Kalender</a>
-        <a href="/assistent" class:active={$page.url.pathname === "/assistent"} on:click={schliessMenu}>🤖 KI-Assistent</a>
-        <a href="/archiv" class:active={$page.url.pathname === "/archiv"} on:click={schliessMenu}>Archiv</a>
-        <a href="/statistik" class:active={$page.url.pathname === "/statistik"} on:click={schliessMenu}>Statistik</a>
+
+        <a href="/neu" title="Neue Deadline" class="neu-link" class:active={$page.url.pathname === "/neu"}>
+          <i class="icon">➕</i>
+          <span class="label">Neue Deadline</span>
+        </a>
+
+        <a href="/tagesplanung" title="Tagesplanung" class:active={$page.url.pathname === "/tagesplanung"}>
+          <i class="icon">📋</i>
+          <span class="label">Tagesplanung</span>
+        </a>
+
+        <a href="/kalender" title="Kalender" class:active={$page.url.pathname === "/kalender"}>
+          <i class="icon">📅</i>
+          <span class="label">Kalender</span>
+        </a>
+
+        <a href="/module" title="Module" class:active={$page.url.pathname === "/module"}>
+          <i class="icon">📚</i>
+          <span class="label">Module</span>
+        </a>
+
+        <a href="/statistik" title="Statistik" class:active={$page.url.pathname === "/statistik"}>
+          <i class="icon">📊</i>
+          <span class="label">Statistik</span>
+        </a>
+
+        <a href="/assistent" title="KI-Assistent" class:active={$page.url.pathname === "/assistent"}>
+          <i class="icon">🤖</i>
+          <span class="label">KI-Assistent</span>
+        </a>
+
+        <a href="/archiv" title="Archiv" class:active={$page.url.pathname === "/archiv"}>
+          <i class="icon">🗂️</i>
+          <span class="label">Archiv</span>
+        </a>
+
         {#if data.user.role === "admin"}
-          <a href="/admin" class:active={$page.url.pathname === "/admin"} on:click={schliessMenu}>👑 Admin</a>
-        {/if}
-        <a href="/neu" class="nav-btn" on:click={schliessMenu}>+ Neue Deadline</a>
-        <div class="nav-right">
-          <button class="dark-toggle" on:click={toggleDark} title={darkMode ? "Helles Design" : "Dunkles Design"} type="button">
-            {darkMode ? "☀️" : "🌙"}
-          </button>
-          <a href="/einstellungen" class="profil-link" class:active={$page.url.pathname === "/einstellungen"} on:click={schliessMenu} title="Einstellungen">⚙️</a>
-          <a href="/profil" class="profil-link" class:active={$page.url.pathname === "/profil"} on:click={schliessMenu}>
-            👤 {data.user.username}
+          <a href="/admin" title="Admin" class:active={$page.url.pathname === "/admin"}>
+            <i class="icon">👑</i>
+            <span class="label">Admin</span>
           </a>
-          <form method="POST" action="/logout">
-            <button type="submit" class="logout-btn" on:click={schliessMenu}>Abmelden</button>
-          </form>
+        {/if}
+
+      </nav>
+
+      <!-- Footer: Einstellungen, Dark Mode, User, Logout -->
+      <div class="sidebar-footer">
+
+        <a href="/einstellungen" title="Einstellungen" class:active={$page.url.pathname === "/einstellungen"}>
+          <i class="icon">⚙️</i>
+          <span class="label">Einstellungen</span>
+        </a>
+
+        <button class="sidebar-btn" on:click={toggleDark} title={darkMode ? "Helles Design" : "Dunkles Design"} type="button">
+          <i class="icon">{darkMode ? "☀️" : "🌙"}</i>
+          <span class="label">{darkMode ? "Helles Design" : "Dunkles Design"}</span>
+        </button>
+
+        <div class="user-info" title={data.user.username}>
+          <i class="icon">👤</i>
+          <span class="label">{data.user.username}</span>
         </div>
-      {:else}
-        <div class="nav-right">
-          <button class="dark-toggle" on:click={toggleDark} title={darkMode ? "Helles Design" : "Dunkles Design"} type="button">
-            {darkMode ? "☀️" : "🌙"}
+
+        <form method="POST" action="/logout">
+          <button type="submit" class="sidebar-btn logout-btn" title="Abmelden">
+            <i class="icon">🚪</i>
+            <span class="label">Abmelden</span>
           </button>
-          <a href="/login" class="nav-login-btn">Anmelden</a>
-          <a href="/login" class="nav-btn">Registrieren</a>
+        </form>
+
+      </div>
+    </aside>
+
+    <!-- Hauptinhalt -->
+    <main class="main-content">
+      {#key $page.url.pathname}
+        <div class="page-content">
+          <slot />
         </div>
-      {/if}
-    </div>
-  </nav>
+      {/key}
+    </main>
 
-  <!-- Mobile Overlay -->
-  {#if menuOffen}
-    <div class="menu-overlay" on:click={schliessMenu} role="button" tabindex="-1" aria-label="Menü schließen"></div>
-  {/if}
+  </div>
 
-  <main class:landing-main={$page.data.isLanding}>
+{:else}
+  <!-- ═══ NICHT EINGELOGGT: Kein Sidebar (Landing / Login) ═══ -->
+  <main class="no-auth-main">
     {#key $page.url.pathname}
       <div class="page-content">
         <slot />
       </div>
     {/key}
   </main>
-</div>
+{/if}
 
 <style>
   /* ══════════════════════════════════════════
@@ -127,12 +171,12 @@
     color: #1a1a2e;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
   :global(h1) { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.25rem; }
   :global(h2) { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.01em; }
   :global(h3) { font-size: 1.1rem; font-weight: 700; }
-
   :global(button) { font-family: inherit; }
   :global(input), :global(select), :global(textarea) {
     font-family: inherit;
@@ -143,34 +187,24 @@
      BACKGROUND BLOBS
   ══════════════════════════════════════════ */
   .bg-blobs {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    overflow: hidden;
-    opacity: 0;
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+    overflow: hidden; opacity: 0;
     transition: opacity 0.5s ease;
   }
   :global([data-theme="dark"]) .bg-blobs { opacity: 1; }
 
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-  }
+  .blob { position: absolute; border-radius: 50%; filter: blur(80px); }
   .blob-1 {
-    width: 700px; height: 700px;
-    top: -200px; right: -150px;
+    width: 700px; height: 700px; top: -200px; right: -150px;
     background: radial-gradient(circle, rgba(233,69,96,0.25) 0%, transparent 70%);
   }
   .blob-2 {
-    width: 600px; height: 600px;
-    bottom: -100px; left: -150px;
+    width: 600px; height: 600px; bottom: -100px; left: -150px;
     background: radial-gradient(circle, rgba(92,107,192,0.2) 0%, transparent 70%);
   }
   .blob-3 {
-    width: 400px; height: 400px;
-    top: 40%; right: 25%;
+    width: 400px; height: 400px; top: 40%; right: 25%;
     background: radial-gradient(circle, rgba(39,174,96,0.12) 0%, transparent 70%);
   }
 
@@ -178,9 +212,7 @@
      PROGRESS BAR
   ══════════════════════════════════════════ */
   .progress-bar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 3px;
+    position: fixed; top: 0; left: 0; right: 0; height: 3px;
     background: linear-gradient(90deg, #e94560, #ff6b6b, #e94560);
     background-size: 200% 100%;
     z-index: 10000;
@@ -192,231 +224,206 @@
   }
 
   /* ══════════════════════════════════════════
-     APP WRAPPER
+     LAYOUT
   ══════════════════════════════════════════ */
-  .app {
+  .app-layout {
+    display: flex;
     min-height: 100vh;
     position: relative;
     z-index: 1;
   }
 
   /* ══════════════════════════════════════════
-     NAVIGATION
+     SIDEBAR
   ══════════════════════════════════════════ */
-  nav {
-    background: rgba(15, 20, 40, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 0.75rem 1.5rem;
+  .sidebar {
+    width: 64px;
+    min-height: 100vh;
+    background: #1a1a2e;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 4px 20px rgba(0,0,0,0.4);
-    gap: 1rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    flex-direction: column;
+    position: fixed;
+    left: 0; top: 0;
+    z-index: 200;
+    overflow: hidden;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
   }
+  .sidebar:hover { width: 220px; }
 
-  .nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
+  /* Brand / Logo */
+  .sidebar-brand {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px; min-height: 64px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-decoration: none; white-space: nowrap;
     flex-shrink: 0;
   }
-  .brand-icon { font-size: 1.3rem; }
+  .brand-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
   .brand-text {
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 800;
+    font-size: 0.95rem; font-weight: 800; color: white;
     letter-spacing: -0.02em;
-    white-space: nowrap;
+    opacity: 0; transition: opacity 0.15s ease;
+    overflow: hidden;
+  }
+  .sidebar:hover .brand-text { opacity: 1; }
+
+  /* Nav */
+  .sidebar-nav {
+    flex: 1; display: flex; flex-direction: column;
+    padding: 10px 8px; gap: 2px; overflow: hidden;
   }
 
-  .nav-links {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    flex-wrap: wrap;
+  .sidebar-nav a,
+  .sidebar-footer a,
+  .sidebar-btn {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; border-radius: 9px;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none; white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+    font-size: 0.875rem; font-weight: 500;
+    background: none; border: none; cursor: pointer;
+    width: 100%; text-align: left;
+    flex-shrink: 0;
   }
 
-  .nav-links a {
-    color: rgba(255,255,255,0.7);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.88rem;
-    padding: 0.4rem 0.7rem;
-    border-radius: 7px;
-    transition: all 0.15s ease;
-    white-space: nowrap;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    letter-spacing: -0.01em;
+  .sidebar-nav a:hover,
+  .sidebar-footer a:hover,
+  .sidebar-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
   }
-  .nav-links a:hover { color: white; background: rgba(255,255,255,0.1); }
-  .nav-links a.active { color: white; background: rgba(255,255,255,0.12); }
 
-  .nav-btn {
+  .sidebar-nav a.active {
+    background: rgba(233,69,96,0.18);
+    color: #e94560;
+    font-weight: 600;
+  }
+
+  .neu-link {
+    background: rgba(233,69,96,0.12) !important;
+    color: #e94560 !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px;
+  }
+  .neu-link:hover {
     background: #e94560 !important;
     color: white !important;
-    font-weight: 600 !important;
   }
-  .nav-btn:hover { background: #c73652 !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(233,69,96,0.4) !important; }
-
-  .nav-login-btn {
-    background: rgba(255,255,255,0.1) !important;
+  .neu-link.active {
+    background: #e94560 !important;
     color: white !important;
   }
-  .nav-login-btn:hover { background: rgba(255,255,255,0.16) !important; }
 
-  .nav-badge {
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 0.1rem 0.42rem;
-    border-radius: 20px;
-    line-height: 1.4;
-    min-width: 18px;
-    text-align: center;
+  /* Icon */
+  .icon {
+    font-size: 20px; flex-shrink: 0;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
   }
-  .nav-badge.urgent {
-    background: #e94560;
-    color: white;
-    animation: badgePulse 1.5s ease-in-out infinite;
-    box-shadow: 0 0 0 0 rgba(233,69,96,0.7);
+
+  /* Badge auf Icon (Collapsed-Modus sichtbar) */
+  .icon-badge {
+    position: absolute; top: -5px; right: -5px;
+    background: #e94560; color: white;
+    border-radius: 50%; font-size: 0.58rem;
+    width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; line-height: 1;
+    border: 1.5px solid #1a1a2e;
+    animation: badgePulse 2s ease-in-out infinite;
   }
   @keyframes badgePulse {
     0% { box-shadow: 0 0 0 0 rgba(233,69,96,0.6); }
-    70% { box-shadow: 0 0 0 6px rgba(233,69,96,0); }
+    70% { box-shadow: 0 0 0 5px rgba(233,69,96,0); }
     100% { box-shadow: 0 0 0 0 rgba(233,69,96,0); }
   }
 
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    border-left: 1px solid rgba(255,255,255,0.12);
-    padding-left: 0.75rem;
-    margin-left: 0.25rem;
+  /* Label (expanded) */
+  .label {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    overflow: hidden; white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sidebar:hover .label { opacity: 1; }
+
+  /* Badge im Label-Text */
+  .label-badge {
+    background: #e94560; color: white;
+    border-radius: 20px; font-size: 0.65rem;
+    padding: 0.1rem 0.45rem; font-weight: 700;
+    line-height: 1.4; min-width: 18px; text-align: center;
   }
 
-  .dark-toggle {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 7px;
-    padding: 0.35rem 0.5rem;
-    cursor: pointer;
-    font-size: 0.95rem;
-    line-height: 1;
-    transition: all 0.15s;
+  /* Footer */
+  .sidebar-footer {
+    padding: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; flex-direction: column; gap: 2px;
+    flex-shrink: 0;
   }
-  .dark-toggle:hover { background: rgba(255,255,255,0.16); }
+  .sidebar-footer form { width: 100%; }
 
-  .profil-link {
-    color: rgba(255,255,255,0.7) !important;
-    font-size: 0.88rem;
-    text-decoration: none;
-    padding: 0.35rem 0.65rem;
-    border-radius: 7px;
-    transition: all 0.15s;
-  }
-  .profil-link:hover, .profil-link.active {
-    color: white !important;
-    background: rgba(255,255,255,0.12) !important;
+  .user-info {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; border-radius: 9px;
+    color: rgba(255,255,255,0.3);
+    font-size: 0.875rem; white-space: nowrap;
+    cursor: default;
   }
 
   .logout-btn {
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.8);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 0.35rem 0.75rem;
-    border-radius: 7px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-family: inherit;
-    white-space: nowrap;
-    transition: all 0.15s;
+    color: rgba(255,255,255,0.5) !important;
   }
-  .logout-btn:hover { background: rgba(255,255,255,0.14); color: white; }
-
-  /* ══════════════════════════════════════════
-     HAMBURGER MENU
-  ══════════════════════════════════════════ */
-  .hamburger {
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    gap: 5px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 8px;
-    cursor: pointer;
-    padding: 0.5rem 0.6rem;
-    flex-shrink: 0;
-  }
-  .hamburger span {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: white;
-    border-radius: 2px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center;
-  }
-  .hamburger.aktiv span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-  .hamburger.aktiv span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-  .hamburger.aktiv span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-  .menu-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 98;
-    backdrop-filter: blur(2px);
+  .logout-btn:hover {
+    background: rgba(233,69,96,0.15) !important;
+    color: #e94560 !important;
   }
 
   /* ══════════════════════════════════════════
-     MAIN CONTENT
+     HAUPTINHALT
   ══════════════════════════════════════════ */
-  main {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1.5rem;
-  }
-  main.landing-main {
-    max-width: 100%;
-    margin: 0;
-    padding: 0;
+  .main-content {
+    margin-left: 64px;
+    flex: 1;
+    padding: 2rem;
+    min-height: 100vh;
+    transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative; z-index: 1;
+    max-width: calc(100vw - 64px);
   }
 
+  /* Wenn Sidebar gehovert: Content verschiebt sich mit */
+  .sidebar:hover ~ .main-content {
+    margin-left: 220px;
+    max-width: calc(100vw - 220px);
+  }
+
+  /* Nicht eingeloggt */
+  .no-auth-main {
+    min-height: 100vh;
+    position: relative; z-index: 1;
+  }
+
+  /* Seiten-Übergangs-Animation */
   .page-content {
     animation: pageIn 0.2s ease-out both;
   }
   @keyframes pageIn {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   /* ══════════════════════════════════════════
-     GLOBAL INTERACTIVE STYLES
+     INTERACTIVE GLOBALS
   ══════════════════════════════════════════ */
-  :global(button:not(.hamburger):not(.dark-toggle):not(.logout-btn):active) {
-    transform: scale(0.97);
-  }
-  :global(a.btn-primary:active), :global(.cta-primary:active) {
-    transform: scale(0.97) !important;
-  }
-
-  /* Card hover lift */
   :global(.card), :global(.stat-card), :global(.modul-karte), :global(.zusammenfassung) {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-
-  /* Global badge animations */
   :global(.badge.rot) {
     animation: pulseBadge 2s ease-in-out infinite;
   }
@@ -424,9 +431,7 @@
     0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.5); }
     50% { box-shadow: 0 0 0 4px rgba(231,76,60,0); }
   }
-  :global(.badge.kritisch) {
-    box-shadow: 0 0 10px rgba(243,156,18,0.4);
-  }
+  :global(.badge.kritisch) { box-shadow: 0 0 10px rgba(243,156,18,0.4); }
 
   /* ══════════════════════════════════════════
      DARK MODE — GLOBAL
@@ -436,7 +441,6 @@
     color: #e6edf3;
   }
 
-  /* Glassmorphism cards in dark mode */
   :global([data-theme="dark"] .stat-card),
   :global([data-theme="dark"] .tabelle-container),
   :global([data-theme="dark"] .leer),
@@ -444,45 +448,38 @@
   :global([data-theme="dark"] .modul-karte),
   :global([data-theme="dark"] .zusammenfassung),
   :global([data-theme="dark"] .tages-karte) {
-    background: rgba(22, 27, 34, 0.85) !important;
+    background: rgba(22,27,34,0.85) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
     box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06) !important;
     color: #e6edf3;
   }
-
   :global([data-theme="dark"] .detail-main) {
-    background: rgba(22, 27, 34, 0.9) !important;
+    background: rgba(22,27,34,0.9) !important;
     backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
   }
-
   :global([data-theme="dark"] main form) {
-    background: rgba(22, 27, 34, 0.85) !important;
+    background: rgba(22,27,34,0.85) !important;
     backdrop-filter: blur(12px) !important;
     border: 1px solid rgba(255,255,255,0.08) !important;
   }
-
   :global([data-theme="dark"] .login-card) {
-    background: rgba(22, 27, 34, 0.9) !important;
+    background: rgba(22,27,34,0.9) !important;
     backdrop-filter: blur(20px) !important;
     border: 1px solid rgba(255,255,255,0.1) !important;
     box-shadow: 0 8px 40px rgba(0,0,0,0.6) !important;
   }
-
   :global([data-theme="dark"] .mock-window) {
-    background: rgba(13, 17, 23, 0.95) !important;
+    background: rgba(13,17,23,0.95) !important;
     border-color: rgba(255,255,255,0.1) !important;
   }
 
-  /* Text colors */
   :global([data-theme="dark"] h1),
   :global([data-theme="dark"] h2),
   :global([data-theme="dark"] h3),
-  :global([data-theme="dark"] .stat-zahl) {
-    color: #e6edf3 !important;
-  }
+  :global([data-theme="dark"] .stat-zahl) { color: #e6edf3 !important; }
 
   :global([data-theme="dark"] .subtitle),
   :global([data-theme="dark"] .stat-label),
@@ -500,9 +497,7 @@
   :global([data-theme="dark"] .modul-meta),
   :global([data-theme="dark"] .dl-datum),
   :global([data-theme="dark"] .fortschritt-meta),
-  :global([data-theme="dark"] .leer p) {
-    color: #8b949e !important;
-  }
+  :global([data-theme="dark"] .leer p) { color: #8b949e !important; }
 
   :global([data-theme="dark"] main label) { color: #c9d1d9 !important; }
 
@@ -512,9 +507,7 @@
   :global([data-theme="dark"] .karte-titel),
   :global([data-theme="dark"] .tages-titel),
   :global([data-theme="dark"] .modul-name),
-  :global([data-theme="dark"] .dl-titel strong) {
-    color: #e6edf3 !important;
-  }
+  :global([data-theme="dark"] .dl-titel strong) { color: #e6edf3 !important; }
 
   :global([data-theme="dark"] td) { border-bottom-color: rgba(255,255,255,0.06) !important; }
   :global([data-theme="dark"] tr:hover) { background: rgba(255,255,255,0.03) !important; }
@@ -547,176 +540,143 @@
   :global([data-theme="dark"] .zurueck-link:hover),
   :global([data-theme="dark"] .export-btn:hover) { background: rgba(255,255,255,0.1) !important; }
   :global([data-theme="dark"] .suche-clear) { color: #4d5566 !important; }
-
   :global([data-theme="dark"] .info-karte) { border-color: rgba(255,255,255,0.06) !important; }
   :global([data-theme="dark"] .tabs) { border-color: rgba(255,255,255,0.1) !important; }
-  :global([data-theme="dark"] .tabs button:not(.active)) {
-    background: rgba(255,255,255,0.04) !important; color: #8b949e !important;
-  }
-
+  :global([data-theme="dark"] .tabs button:not(.active)) { background: rgba(255,255,255,0.04) !important; color: #8b949e !important; }
   :global([data-theme="dark"] .deadline-karte) { background: rgba(13,17,23,0.8) !important; border-color: rgba(255,255,255,0.08) !important; }
   :global([data-theme="dark"] .deadline-karte:hover) { background: rgba(22,27,34,0.95) !important; border-color: #e94560 !important; }
   :global([data-theme="dark"] .deadline-karte.status-erledigt) { background: rgba(13,17,23,0.5) !important; }
   :global([data-theme="dark"] .monat-section) { background: rgba(22,27,34,0.85) !important; border-color: rgba(255,255,255,0.08) !important; }
-
   :global([data-theme="dark"] .stats-mini) { background: rgba(13,17,23,0.6) !important; }
-
   :global([data-theme="dark"] .tage-karte.ok) { background: rgba(10,31,17,0.8) !important; }
   :global([data-theme="dark"] .tage-karte.warnung) { background: rgba(31,26,10,0.8) !important; }
   :global([data-theme="dark"] .tage-karte.kritisch) { background: rgba(31,21,10,0.8) !important; }
   :global([data-theme="dark"] .tage-karte.ueberfaellig) { background: rgba(31,10,10,0.8) !important; }
   :global([data-theme="dark"] .tage-karte.erledigt) { background: rgba(10,31,17,0.8) !important; }
-
   :global([data-theme="dark"] .user-badge) { background: rgba(255,255,255,0.06) !important; color: #8b949e !important; }
   :global([data-theme="dark"] .fehler) { background: rgba(61,18,18,0.8) !important; color: #f87171 !important; }
   :global([data-theme="dark"] .erfolg) { background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; }
   :global([data-theme="dark"] .breadcrumb) { color: #8b949e !important; }
-
   :global([data-theme="dark"] .rolle.admin),
   :global([data-theme="dark"] .rolle-badge.admin) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; }
   :global([data-theme="dark"] .rolle.user),
   :global([data-theme="dark"] .rolle-badge.user) { background: rgba(30,45,74,0.8) !important; color: #93c5fd !important; }
-
   :global([data-theme="dark"] .prio.hoch),
   :global([data-theme="dark"] .karte-prio.prio-hoch) { background: rgba(61,18,18,0.8) !important; color: #f87171 !important; }
   :global([data-theme="dark"] .prio.mittel),
   :global([data-theme="dark"] .karte-prio.prio-mittel) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; }
   :global([data-theme="dark"] .prio.niedrig),
   :global([data-theme="dark"] .karte-prio.prio-niedrig) { background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; }
-
   :global([data-theme="dark"] .status-badge.offen),
   :global([data-theme="dark"] .karte-status.status-badge-offen) { background: rgba(30,45,74,0.8) !important; color: #93c5fd !important; }
   :global([data-theme="dark"] .status-badge.in-bearbeitung),
   :global([data-theme="dark"] .karte-status.status-badge-in-bearbeitung) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; }
   :global([data-theme="dark"] .status-badge.erledigt),
   :global([data-theme="dark"] .karte-status.status-badge-erledigt) { background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; }
-
   :global([data-theme="dark"] .badge.rot) { background: rgba(61,18,18,0.9) !important; color: #f87171 !important; border: 1px solid rgba(231,76,60,0.3) !important; }
   :global([data-theme="dark"] .badge.orange) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; }
   :global([data-theme="dark"] .badge.kritisch) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; box-shadow: 0 0 10px rgba(243,156,18,0.2) !important; }
   :global([data-theme="dark"] .badge.warnung) { background: rgba(61,48,18,0.8) !important; color: #fde047 !important; }
   :global([data-theme="dark"] .badge.ok) { background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; }
-
   :global([data-theme="dark"] .tage-badge.ueberfaellig) { background: rgba(61,18,18,0.8) !important; color: #f87171 !important; }
   :global([data-theme="dark"] .tage-badge.heute) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; }
   :global([data-theme="dark"] .tage-badge.kritisch) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; }
   :global([data-theme="dark"] .tage-badge.warnung) { background: rgba(61,48,18,0.8) !important; color: #fde047 !important; }
   :global([data-theme="dark"] .tage-badge.ok) { background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; }
-
   :global([data-theme="dark"] .btn-delete) { background: rgba(61,18,18,0.6) !important; color: #f87171 !important; }
   :global([data-theme="dark"] .btn-delete:hover) { background: rgba(90,26,26,0.8) !important; }
-
   :global([data-theme="dark"] .login-card h1) { color: #e6edf3 !important; }
   :global([data-theme="dark"] .login-card p) { color: #8b949e !important; }
-
   :global([data-theme="dark"] .inline-form input),
-  :global([data-theme="dark"] .inline-form select) {
-    background: rgba(13,17,23,0.8) !important; border-color: rgba(255,255,255,0.12) !important; color: #e6edf3 !important;
-  }
-
+  :global([data-theme="dark"] .inline-form select) { background: rgba(13,17,23,0.8) !important; border-color: rgba(255,255,255,0.12) !important; color: #e6edf3 !important; }
   :global([data-theme="dark"] .feature-card) { background: rgba(22,27,34,0.85) !important; border-color: rgba(255,255,255,0.08) !important; }
   :global([data-theme="dark"] .feature-card h3) { color: #e6edf3 !important; }
-
-  :global([data-theme="dark"] .warnung-banner.gefahr) {
-    background: rgba(61,18,18,0.8) !important; color: #f87171 !important; border-color: rgba(231,76,60,0.4) !important;
-  }
-  :global([data-theme="dark"] .warnung-banner.warnung) {
-    background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; border-color: rgba(243,156,18,0.4) !important;
-  }
-  :global([data-theme="dark"] .warnung-banner.info) {
-    background: rgba(30,45,74,0.8) !important; color: #93c5fd !important; border-color: rgba(92,107,192,0.4) !important;
-  }
-  :global([data-theme="dark"] .warnung-banner.erfolg) {
-    background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; border-color: rgba(39,174,96,0.4) !important;
-  }
-
-  :global([data-theme="dark"] .fortschritt-popup) {
-    background: rgba(22,27,34,0.95) !important; border-color: rgba(255,255,255,0.1) !important;
-  }
+  :global([data-theme="dark"] .warnung-banner.gefahr) { background: rgba(61,18,18,0.8) !important; color: #f87171 !important; border-color: rgba(231,76,60,0.4) !important; }
+  :global([data-theme="dark"] .warnung-banner.warnung) { background: rgba(61,42,18,0.8) !important; color: #fbbf24 !important; border-color: rgba(243,156,18,0.4) !important; }
+  :global([data-theme="dark"] .warnung-banner.info) { background: rgba(30,45,74,0.8) !important; color: #93c5fd !important; border-color: rgba(92,107,192,0.4) !important; }
+  :global([data-theme="dark"] .warnung-banner.erfolg) { background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; border-color: rgba(39,174,96,0.4) !important; }
+  :global([data-theme="dark"] .fortschritt-popup) { background: rgba(22,27,34,0.95) !important; border-color: rgba(255,255,255,0.1) !important; }
   :global([data-theme="dark"] .mini-bar-bg) { background: rgba(255,255,255,0.1) !important; }
-
-  :global([data-theme="dark"] .tages-karte) {
-    background: rgba(22,27,34,0.85) !important;
-    border-left-color: rgba(255,255,255,0.12);
-  }
-  :global([data-theme="dark"] .tages-karte:hover) {
-    background: rgba(30,36,50,0.95) !important;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.4) !important;
-  }
+  :global([data-theme="dark"] .tages-karte) { background: rgba(22,27,34,0.85) !important; border-left-color: rgba(255,255,255,0.12); }
+  :global([data-theme="dark"] .tages-karte:hover) { background: rgba(30,36,50,0.95) !important; box-shadow: 0 6px 24px rgba(0,0,0,0.4) !important; }
   :global([data-theme="dark"] .tages-gruppe h3) { color: #e6edf3 !important; }
   :global([data-theme="dark"] .gruppe-leer) { color: #8b949e !important; }
-
   :global([data-theme="dark"] .modul-header:hover) { background: rgba(255,255,255,0.04) !important; }
   :global([data-theme="dark"] .modul-deadline-zeile) { border-bottom-color: rgba(255,255,255,0.06) !important; }
   :global([data-theme="dark"] .modul-deadline-zeile:hover) { background: rgba(255,255,255,0.03) !important; }
   :global([data-theme="dark"] .toggle-icon) { color: #555 !important; }
-
   :global([data-theme="dark"] .mini-bar) { background: rgba(255,255,255,0.1) !important; }
   :global([data-theme="dark"] .fortschritt-bar-mini) { background: rgba(255,255,255,0.1) !important; }
   :global([data-theme="dark"] .fortschritt-bar-gross) { background: rgba(255,255,255,0.1) !important; }
-  :global([data-theme="dark"] .notizen-text) {
-    background: rgba(30,45,74,0.4) !important; color: #c9d1d9 !important; border-color: rgba(92,107,192,0.4) !important;
-  }
-
+  :global([data-theme="dark"] .notizen-text) { background: rgba(30,45,74,0.4) !important; color: #c9d1d9 !important; border-color: rgba(92,107,192,0.4) !important; }
   :global([data-theme="dark"] .fortschritt-sektion) { border-color: rgba(255,255,255,0.06) !important; }
   :global([data-theme="dark"] .notizen-sektion) { border-color: rgba(255,255,255,0.06) !important; }
-
   :global([data-theme="dark"] .zf-divider) { background: rgba(255,255,255,0.1) !important; }
   :global([data-theme="dark"] .zf-zahl) { color: #e6edf3 !important; }
-
   :global([data-theme="dark"] .typ-pill) { background: rgba(30,45,74,0.8) !important; color: #93c5fd !important; }
-
   :global([data-theme="dark"] .leer-emoji) { filter: grayscale(0.2); }
 
   /* ══════════════════════════════════════════
-     MOBILE RESPONSIVE
+     MOBILE: Sidebar als Bottom-Bar
   ══════════════════════════════════════════ */
-  @media (max-width: 900px) {
-    .hamburger { display: flex; }
-    .menu-overlay { display: block; }
-
-    .nav-links {
-      position: fixed;
-      top: 0;
-      left: 0; right: 0;
-      bottom: 0;
-      background: rgba(10, 14, 28, 0.98);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 5rem 1.5rem 2rem;
-      gap: 0.25rem;
-      transform: translateX(-100%);
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      z-index: 99;
-      overflow-y: auto;
-    }
-    .nav-links.offen { transform: translateX(0); }
-
-    .nav-links a {
+  @media (max-width: 768px) {
+    .sidebar {
       width: 100%;
-      padding: 0.75rem 1rem;
-      font-size: 1rem;
-      border-radius: 10px;
+      height: 56px;
+      min-height: unset;
+      flex-direction: row;
+      top: auto; bottom: 0; left: 0; right: 0;
+      overflow-x: auto; overflow-y: hidden;
+      border-right: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.2);
     }
+    /* Hover-Effekt auf Mobile deaktivieren */
+    .sidebar:hover { width: 100%; height: 56px; }
 
-    .nav-right {
-      border-left: none;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding-left: 0;
-      padding-top: 1rem;
-      margin-left: 0;
-      margin-top: 0.5rem;
-      width: 100%;
-      flex-wrap: wrap;
+    .sidebar-brand { display: none; }
+
+    .sidebar-nav {
+      flex-direction: row;
+      flex: 1;
+      padding: 0 4px;
+      gap: 0;
+      align-items: center;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+    .sidebar-nav a { padding: 8px 10px; border-radius: 8px; }
 
-    .nav-btn { margin-top: 0.5rem; }
+    .sidebar-footer {
+      flex-direction: row; border-top: none;
+      border-left: 1px solid rgba(255,255,255,0.08);
+      padding: 0 4px; align-items: center;
+      flex-shrink: 0;
+    }
+    .sidebar-footer form { width: auto; }
+    .sidebar-footer .sidebar-btn,
+    .sidebar-footer a { padding: 8px 10px; }
+    .user-info { display: none; }
+
+    /* Labels auf Mobile immer versteckt */
+    .label { display: none !important; }
+    .brand-text { display: none; }
+
+    .main-content {
+      margin-left: 0 !important;
+      margin-bottom: 56px;
+      padding: 1rem;
+      max-width: 100%;
+    }
+    .sidebar:hover ~ .main-content {
+      margin-left: 0 !important;
+      max-width: 100%;
+    }
   }
 
-  @media (max-width: 640px) {
-    main { margin: 1rem auto; padding: 0 1rem; }
+  @media (max-width: 480px) {
     :global(h1) { font-size: 1.6rem; }
+    .main-content { padding: 0.75rem; }
   }
 </style>
