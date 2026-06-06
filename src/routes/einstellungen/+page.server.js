@@ -7,14 +7,17 @@ import { validatePassword, validateEmail } from "$lib/validation.js";
 export async function load({ locals }) {
   if (!locals.user) throw redirect(303, "/login");
 
-  const notif = locals.user.notificationSettings || {};
-  const settings = locals.user.settings || {};
-  const navbarSettings = locals.user.navbarSettings || {};
+  const db = await getDb();
+  const user = await db.collection("users").findOne({ _id: new ObjectId(locals.user._id.toString()) });
+
+  const notif = user.notificationSettings || {};
+  const settings = user.settings || {};
+  const nav = user.navbarSettings || {};
 
   return {
     profil: {
-      username: locals.user.username,
-      email: locals.user.email || "",
+      username: user.username,
+      email: user.email || "",
     },
     notificationSettings: {
       nearDeadline: notif.nearDeadline ?? false,
@@ -25,11 +28,11 @@ export async function load({ locals }) {
       defaultStatus: settings.defaultStatus || "offen",
     },
     navbarSettings: {
-      tagesplanung: navbarSettings.tagesplanung ?? true,
-      kalender: navbarSettings.kalender ?? true,
-      module: navbarSettings.module ?? true,
-      statistik: navbarSettings.statistik ?? true,
-      archiv: navbarSettings.archiv ?? true,
+      tagesplanung: nav.tagesplanung ?? true,
+      kalender: nav.kalender ?? true,
+      module: nav.module ?? true,
+      statistik: nav.statistik ?? true,
+      archiv: nav.archiv ?? true,
     },
   };
 }
@@ -46,7 +49,6 @@ export const actions = {
       return fail(400, { profilError: "Anzeigename mind. 3 Zeichen erforderlich" });
     }
 
-    // Nur validieren wenn eine E-Mail eingegeben wurde
     const updates = { username };
     if (emailRaw) {
       const emailError = validateEmail(emailRaw);
@@ -149,7 +151,7 @@ export const actions = {
     return { standardSuccess: true };
   },
 
-  navbar: async ({ request, locals }) => {
+  navigation: async ({ request, locals }) => {
     if (!locals.user) throw redirect(303, "/login");
 
     const data = await request.formData();
@@ -169,6 +171,6 @@ export const actions = {
       }
     );
 
-    return { navbarSuccess: true };
+    return { navigationSuccess: true };
   },
 };

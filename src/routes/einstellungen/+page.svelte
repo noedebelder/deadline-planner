@@ -9,8 +9,7 @@
   let ladenStandard = false;
   let ladenNavbar = false;
 
-  // Navbar-Toggles initialisieren
-  let navbarSettings = {
+  $: navbarSettings = {
     tagesplanung: data.navbarSettings?.tagesplanung ?? true,
     kalender: data.navbarSettings?.kalender ?? true,
     module: data.navbarSettings?.module ?? true,
@@ -164,11 +163,11 @@
     <h2>🧭 Navigation anpassen</h2>
     <p class="card-sub">Wähle welche Seiten in der Tab-Leiste angezeigt werden</p>
 
-    {#if form?.navbarSuccess}
+    {#if form?.navigationSuccess}
       <div class="erfolg">✅ Navigation gespeichert!</div>
     {/if}
 
-    <form method="POST" action="?/navbar" use:enhance={() => {
+    <form method="POST" action="?/navigation" use:enhance={() => {
       ladenNavbar = true;
       return async ({ update }) => { await update(); ladenNavbar = false; };
     }}>

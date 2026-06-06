@@ -7,7 +7,6 @@
   let sortFeld = "deadline";
   let sortAsc = true;
   let fortschrittEdit = null;
-  let subtaskDropdown = null; // ID der Deadline mit geöffnetem Subtask-Dropdown
 
   const prioritaetOrder = { hoch: 0, mittel: 1, niedrig: 2 };
   const statusOrder = { "in-bearbeitung": 0, offen: 1, erledigt: 2 };
@@ -265,55 +264,11 @@
           <tr class="{d.status === 'erledigt' ? 'zeile-erledigt' : statusKlasse(d.deadline)}">
             <td data-label="Titel">
               {#if d.status === 'erledigt'}<span class="erledigt-haken">✅</span>{/if}
-              <a href="/deadline/{d.id}" class="titel-link" class:durchgestrichen={d.status === 'erledigt'}>
+              <a href="/bearbeiten/{d.id}" class="titel-link" class:durchgestrichen={d.status === 'erledigt'}>
                 <strong>{d.titel}</strong>
               </a>
               {#if d.typ && d.typ !== "Sonstiges"}
                 <span class="typ-pill">{d.typ}</span>
-              {/if}
-              {#if d.subtaskCount > 0}
-                <span class="subtask-pill {d.subtaskErledigt === d.subtaskCount ? 'subtask-done' : ''}">
-                  ✓ {d.subtaskErledigt}/{d.subtaskCount}
-                </span>
-              {/if}
-              <!-- Subtask-Dropdown -->
-              {#if d.subtasks && d.subtasks.filter(s => !s.erledigt).length > 0}
-                <div class="subtask-bereich">
-                  <button
-                    type="button"
-                    class="subtask-dropdown-btn"
-                    on:click|stopPropagation={() => subtaskDropdown = subtaskDropdown === d.id ? null : d.id}
-                  >
-                    Subtask erledigen ▾
-                  </button>
-                  {#if subtaskDropdown === d.id}
-                    <div class="subtask-dropdown">
-                      {#each d.subtasks.filter(s => !s.erledigt) as st}
-                        <form method="POST" action="?/subtaskErledigen"
-                          use:enhance={() => {
-                            return async ({ result, update }) => {
-                              if (result.type === 'success') {
-                                addToast("Subtask erledigt ✓");
-                                subtaskDropdown = null;
-                                await update({ reset: false });
-                              }
-                            };
-                          }}
-                        >
-                          <input type="hidden" name="deadlineId" value={d.id} />
-                          <input type="hidden" name="subtaskId" value={st.id} />
-                          <button type="submit" class="subtask-zeile">
-                            <span class="subtask-info">
-                              <span class="subtask-name">{st.titel}</span>
-                              {#if st.aufwand}<span class="subtask-aufwand">{st.aufwand}h</span>{/if}
-                            </span>
-                            <span class="subtask-check">✓</span>
-                          </button>
-                        </form>
-                      {/each}
-                    </div>
-                  {/if}
-                </div>
               {/if}
             </td>
             <td data-label="Modul">{d.modul}</td>
@@ -331,13 +286,7 @@
                 <span class="badge {statusKlasse(d.deadline)}">{tageVerbleibend(d.deadline)}d</span>
               {/if}
             </td>
-            <td data-label="Aufwand">
-              {#if d.subtaskCount > 0}
-                <span title="{d.aufwand}h total">{d.aufwandVerbleibend}h</span>
-              {:else}
-                {d.aufwand}h
-              {/if}
-            </td>
+            <td data-label="Aufwand">{d.aufwand}h</td>
             <td data-label="Priorität"><span class="prio {d.prioritaet}">{d.prioritaet}</span></td>
             <td data-label="Status">
               {#if d.status === 'erledigt'}
@@ -383,7 +332,6 @@
             </td>
             <td data-label="Aktionen">
               <div class="aktionen">
-                <a href="/deadline/{d.id}" class="btn-icon" title="Details">👁️</a>
                 <a href="/bearbeiten/{d.id}" class="btn-icon" title="Bearbeiten">✏️</a>
                 <!-- Status Toggle -->
                 <form method="POST" action="?/statusToggle"
@@ -748,45 +696,6 @@
     padding: 0.1rem 0.45rem; border-radius: 8px; margin-left: 0.4rem; vertical-align: middle;
     font-weight: 500;
   }
-  .subtask-pill {
-    display: inline-block; font-size: 0.68rem; background: #f0fff4; color: #27ae60;
-    padding: 0.1rem 0.45rem; border-radius: 8px; margin-left: 0.3rem; vertical-align: middle;
-    font-weight: 600; border: 1px solid rgba(39,174,96,0.2);
-  }
-  .subtask-pill.subtask-done { background: #eafaf1; color: #1a9e55; }
-
-  /* Subtask-Dropdown */
-  .subtask-bereich { position: relative; margin-top: 0.35rem; }
-  .subtask-dropdown-btn {
-    font-size: 0.72rem; color: #5c6bc0; background: #eef2ff;
-    border: 1px solid rgba(92,107,192,0.2); border-radius: 6px;
-    padding: 0.2rem 0.55rem; cursor: pointer; font-weight: 600;
-    transition: background 0.15s;
-  }
-  .subtask-dropdown-btn:hover { background: #e0e7ff; }
-  .subtask-dropdown {
-    position: absolute; top: calc(100% + 4px); left: 0;
-    background: white; border: 1px solid #e0e0e0; border-radius: 10px;
-    min-width: 220px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    z-index: 50; padding: 0.4rem;
-    animation: dropIn 0.15s ease;
-  }
-  @keyframes dropIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .subtask-zeile {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%; padding: 0.5rem 0.7rem; border: none; background: none;
-    cursor: pointer; border-radius: 7px; font-family: inherit;
-    transition: background 0.12s;
-  }
-  .subtask-zeile:hover { background: #f0fff4; }
-  .subtask-info { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
-  .subtask-name { font-size: 0.82rem; font-weight: 600; color: #1a1a2e; }
-  .subtask-aufwand { font-size: 0.72rem; color: #888; }
-  .subtask-check { color: #27ae60; font-weight: 700; font-size: 0.9rem; }
-
   /* Badges */
   .badge {
     display: inline-flex; align-items: center; gap: 0.3rem;

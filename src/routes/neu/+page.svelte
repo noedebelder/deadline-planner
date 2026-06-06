@@ -4,16 +4,6 @@
   export let form;
   let laden = false;
   let fortschrittWert = 0;
-
-  let subtasks = [];
-
-  function subtaskHinzufuegen() {
-    subtasks = [...subtasks, { titel: "", aufwand: "", datum: "" }];
-  }
-
-  function subtaskEntfernen(i) {
-    subtasks = subtasks.filter((_, idx) => idx !== i);
-  }
 </script>
 
 <h1>Neue Deadline erfassen</h1>
@@ -37,9 +27,6 @@
     };
   }}
 >
-  <!-- Subtasks als JSON übertragen -->
-  <input type="hidden" name="subtasksJson" value={JSON.stringify(subtasks)} />
-
   <label>
     Titel
     <input type="text" name="titel" placeholder="z.B. Projektarbeit Prototyping" required />
@@ -119,53 +106,6 @@
     ></textarea>
   </label>
 
-  <!-- ══════════════ SUBTASKS ══════════════ -->
-  <div class="subtask-bereich">
-    <div class="subtask-kopf">
-      <span class="subtask-titel">📌 Subtasks</span>
-      <span class="subtask-anzahl">{subtasks.length} Subtask{subtasks.length !== 1 ? "s" : ""}</span>
-    </div>
-
-    {#each subtasks as st, i}
-      <div class="subtask-zeile">
-        <div class="subtask-felder">
-          <input
-            type="text"
-            placeholder="Subtask-Titel"
-            bind:value={st.titel}
-            class="st-titel"
-            required
-          />
-          <input
-            type="number"
-            placeholder="Std."
-            bind:value={st.aufwand}
-            min="0"
-            step="0.5"
-            class="st-aufwand"
-            title="Aufwand in Stunden"
-          />
-          <input
-            type="date"
-            bind:value={st.datum}
-            class="st-datum"
-            title="Geplantes Datum"
-          />
-        </div>
-        <button
-          type="button"
-          class="st-entfernen"
-          on:click={() => subtaskEntfernen(i)}
-          title="Subtask entfernen"
-        >✕</button>
-      </div>
-    {/each}
-
-    <button type="button" class="btn-subtask-add" on:click={subtaskHinzufuegen}>
-      + Subtask hinzufügen
-    </button>
-  </div>
-
   <div class="buttons">
     <a href="/" class="abbrechen">Abbrechen</a>
     <button type="submit" disabled={laden}>
@@ -243,84 +183,6 @@
     border-radius: 3px;
     transition: width 0.2s;
   }
-
-  /* ══════ SUBTASKS ══════ */
-  .subtask-bereich {
-    border: 1.5px solid #e8eaed;
-    border-radius: 10px;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    background: #fafbff;
-  }
-  .subtask-kopf {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .subtask-titel {
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: #1a1a2e;
-  }
-  .subtask-anzahl {
-    font-size: 0.78rem;
-    color: #888;
-    background: #eef2ff;
-    padding: 0.15rem 0.55rem;
-    border-radius: 20px;
-  }
-  .subtask-zeile {
-    display: flex;
-    gap: 0.5rem;
-    align-items: flex-start;
-  }
-  .subtask-felder {
-    display: grid;
-    grid-template-columns: 1fr 70px 130px;
-    gap: 0.5rem;
-    flex: 1;
-  }
-  .st-titel, .st-aufwand, .st-datum {
-    padding: 0.55rem 0.75rem;
-    font-size: 0.88rem;
-  }
-  .st-aufwand { text-align: center; }
-  .st-entfernen {
-    background: #ffeaea;
-    border: 1px solid rgba(231,76,60,0.2);
-    color: #e74c3c;
-    border-radius: 7px;
-    width: 32px;
-    height: 32px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-    transition: background 0.15s;
-  }
-  .st-entfernen:hover { background: #ffd4d4; }
-  .btn-subtask-add {
-    background: none;
-    border: 1.5px dashed #5c6bc0;
-    color: #5c6bc0;
-    border-radius: 8px;
-    padding: 0.55rem;
-    cursor: pointer;
-    font-size: 0.88rem;
-    font-weight: 600;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
-  .btn-subtask-add:hover {
-    background: #eef2ff;
-    border-style: solid;
-  }
-
   .buttons { display: flex; gap: 1rem; margin-top: 0.5rem; }
   button[type="submit"] {
     flex: 1;
@@ -360,8 +222,4 @@
     display: inline-block;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  @media (max-width: 560px) {
-    .subtask-felder { grid-template-columns: 1fr; }
-  }
 </style>

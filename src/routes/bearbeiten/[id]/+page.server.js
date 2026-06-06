@@ -33,7 +33,6 @@ export async function load({ params, locals }) {
       typ: deadline.typ || "Sonstiges",
       fortschritt: deadline.fortschritt ?? 0,
       notizen: deadline.notizen || "",
-      hasSubtasks: !!(deadline.subtasks?.length),
     },
   };
 }
@@ -63,6 +62,6 @@ export const actions = {
       },
     });
 
-    redirect(303, "/");
+    throw redirect(303, "/");
   },
 };

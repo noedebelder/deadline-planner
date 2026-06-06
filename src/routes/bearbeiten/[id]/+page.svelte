@@ -58,16 +58,7 @@
   <div class="zwei-spalten">
     <label>
       Aufwand (Stunden)
-      {#if data.deadline.hasSubtasks}
-        <input type="hidden" name="aufwand" value={data.deadline.aufwand} />
-        <div class="aufwand-auto">
-          <span class="aufwand-wert">{data.deadline.aufwand}h</span>
-          <span class="aufwand-auto-hint">automatisch aus Subtasks</span>
-        </div>
-        <a href="/deadline/{data.deadline.id}" class="subtask-verwalten-link">✅ Subtasks verwalten →</a>
-      {:else}
-        <input type="number" name="aufwand" value={data.deadline.aufwand} min="1" required />
-      {/if}
+      <input type="number" name="aufwand" value={data.deadline.aufwand} min="1" required />
     </label>
 
     <label>
@@ -91,26 +82,18 @@
 
   <label>
     Fortschritt: <strong>{fortschrittWert}%</strong>
-    {#if data.deadline.hasSubtasks}
-      <input type="hidden" name="fortschritt" value={fortschrittWert} />
-      <div class="mini-bar">
-        <div class="mini-fill" style="width: {fortschrittWert}%"></div>
-      </div>
-      <span class="aufwand-auto-hint">automatisch aus Subtasks berechnet</span>
-    {:else}
-      <input
-        type="range"
-        name="fortschritt"
-        min="0"
-        max="100"
-        step="5"
-        bind:value={fortschrittWert}
-        class="range-input"
-      />
-      <div class="mini-bar">
-        <div class="mini-fill" style="width: {fortschrittWert}%"></div>
-      </div>
-    {/if}
+    <input
+      type="range"
+      name="fortschritt"
+      min="0"
+      max="100"
+      step="5"
+      bind:value={fortschrittWert}
+      class="range-input"
+    />
+    <div class="mini-bar">
+      <div class="mini-fill" style="width: {fortschrittWert}%"></div>
+    </div>
   </label>
 
   <label>
@@ -215,20 +198,4 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .aufwand-auto {
-    display: flex; align-items: center; gap: 0.6rem;
-    padding: 0.7rem 1rem; border: 2px solid #e0e0e0; border-radius: 8px;
-    background: #f8f9ff;
-  }
-  .aufwand-wert { font-size: 1rem; font-weight: 700; color: #1a1a2e; }
-  .aufwand-auto-hint { font-size: 0.78rem; color: #888; font-weight: 400; }
-
-  .subtask-verwalten-link {
-    display: inline-flex; align-items: center; gap: 0.3rem;
-    font-size: 0.85rem; color: #27ae60; text-decoration: none; font-weight: 600;
-    padding: 0.35rem 0.75rem; background: #eafaf1; border-radius: 8px;
-    border: 1px solid rgba(39,174,96,0.2); transition: all 0.15s;
-    align-self: flex-start;
-  }
-  .subtask-verwalten-link:hover { background: #d5f5e3; color: #1a9e55; }
 </style>
