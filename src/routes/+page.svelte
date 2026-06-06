@@ -7,9 +7,10 @@
   let sortFeld = "deadline";
   let sortAsc = true;
   let fortschrittEdit = null;
+  let subtaskDropdown = null; // ID der Deadline mit geöffnetem Subtask-Dropdown
 
   const prioritaetOrder = { hoch: 0, mittel: 1, niedrig: 2 };
-  const statusOrder = { "in-bearbeitung": 0, offen: 1 };
+  const statusOrder = { "in-bearbeitung": 0, offen: 1, erledigt: 2 };
 
   function sort(feld) {
     if (sortFeld === feld) sortAsc = !sortAsc;
@@ -49,11 +50,12 @@
     return "ok";
   }
 
+  $: aktiveDeadlines = (data.deadlines ?? []).filter(d => d.status !== "erledigt");
+
   $: warnungen = (() => {
-    const alle = data.deadlines ?? [];
     const result = [];
-    const ueberfaellig = alle.filter(d => tageVerbleibend(d.deadline) < 0);
-    const dieseWoche = alle.filter(d => {
+    const ueberfaellig = aktiveDeadlines.filter(d => tageVerbleibend(d.deadline) < 0);
+    const dieseWoche = aktiveDeadlines.filter(d => {
       const t = tageVerbleibend(d.deadline);
       return t >= 0 && t <= 7;
     });
@@ -183,12 +185,11 @@
 <div class="header">
   <div>
     <h1>Meine Deadlines</h1>
-    <p class="subtitle">{sortiert.length} aktive Aufgabe{sortiert.length !== 1 ? "n" : ""}</p>
+    <p class="subtitle">{sortiert.filter(d => d.status !== 'erledigt').length} aktive Aufgabe{sortiert.filter(d => d.status !== 'erledigt').length !== 1 ? "n" : ""}</p>
   </div>
   <div class="header-rechts">
     <a href="/api/export/ical" download class="export-btn" title="iCal herunterladen">📅 iCal</a>
     <a href="/api/export" download class="export-btn" title="CSV herunterladen">⬇️ CSV</a>
-    <a href="/archiv" class="archiv-link">📦 Archiv</a>
   </div>
 </div>
 
@@ -203,22 +204,22 @@
 <div class="stats-row">
   <div class="stat-card rot">
     <span class="stat-icon">🔥</span>
-    <span class="stat-zahl">{(data.deadlines ?? []).filter(d => tageVerbleibend(d.deadline) < 0).length}</span>
+    <span class="stat-zahl">{aktiveDeadlines.filter(d => tageVerbleibend(d.deadline) < 0).length}</span>
     <span class="stat-label">Überfällig</span>
   </div>
   <div class="stat-card orange">
     <span class="stat-icon">⚡</span>
-    <span class="stat-zahl">{(data.deadlines ?? []).filter(d => tageVerbleibend(d.deadline) >= 0 && tageVerbleibend(d.deadline) <= 7).length}</span>
+    <span class="stat-zahl">{aktiveDeadlines.filter(d => tageVerbleibend(d.deadline) >= 0 && tageVerbleibend(d.deadline) <= 7).length}</span>
     <span class="stat-label">Diese Woche</span>
   </div>
   <div class="stat-card gruen">
     <span class="stat-icon">📅</span>
-    <span class="stat-zahl">{(data.deadlines ?? []).filter(d => tageVerbleibend(d.deadline) > 7).length}</span>
+    <span class="stat-zahl">{aktiveDeadlines.filter(d => tageVerbleibend(d.deadline) > 7).length}</span>
     <span class="stat-label">Geplant</span>
   </div>
   <div class="stat-card blau">
     <span class="stat-icon">⏱️</span>
-    <span class="stat-zahl">{(data.deadlines ?? []).reduce((sum, d) => sum + d.aufwand, 0)}h</span>
+    <span class="stat-zahl">{aktiveDeadlines.reduce((sum, d) => sum + d.aufwand, 0)}h</span>
     <span class="stat-label">Total Aufwand</span>
   </div>
 </div>
@@ -234,7 +235,6 @@
 </div>
 
 {#if (data.deadlines ?? []).length === 0}
-  <!-- Leerer Zustand -->
   <div class="leer">
     <div class="leer-emoji">🚀</div>
     <h2 class="leer-titel">Noch keine Deadlines!</h2>
@@ -262,9 +262,12 @@
       </thead>
       <tbody>
         {#each sortiert as d}
-          <tr class={statusKlasse(d.deadline)}>
+          <tr class="{d.status === 'erledigt' ? 'zeile-erledigt' : statusKlasse(d.deadline)}">
             <td data-label="Titel">
-              <a href="/deadline/{d.id}" class="titel-link"><strong>{d.titel}</strong></a>
+              {#if d.status === 'erledigt'}<span class="erledigt-haken">✅</span>{/if}
+              <a href="/deadline/{d.id}" class="titel-link" class:durchgestrichen={d.status === 'erledigt'}>
+                <strong>{d.titel}</strong>
+              </a>
               {#if d.typ && d.typ !== "Sonstiges"}
                 <span class="typ-pill">{d.typ}</span>
               {/if}
@@ -273,11 +276,52 @@
                   ✓ {d.subtaskErledigt}/{d.subtaskCount}
                 </span>
               {/if}
+              <!-- Subtask-Dropdown -->
+              {#if d.subtasks && d.subtasks.filter(s => !s.erledigt).length > 0}
+                <div class="subtask-bereich">
+                  <button
+                    type="button"
+                    class="subtask-dropdown-btn"
+                    on:click|stopPropagation={() => subtaskDropdown = subtaskDropdown === d.id ? null : d.id}
+                  >
+                    Subtask erledigen ▾
+                  </button>
+                  {#if subtaskDropdown === d.id}
+                    <div class="subtask-dropdown">
+                      {#each d.subtasks.filter(s => !s.erledigt) as st}
+                        <form method="POST" action="?/subtaskErledigen"
+                          use:enhance={() => {
+                            return async ({ result, update }) => {
+                              if (result.type === 'success') {
+                                addToast("Subtask erledigt ✓");
+                                subtaskDropdown = null;
+                                await update({ reset: false });
+                              }
+                            };
+                          }}
+                        >
+                          <input type="hidden" name="deadlineId" value={d.id} />
+                          <input type="hidden" name="subtaskId" value={st.id} />
+                          <button type="submit" class="subtask-zeile">
+                            <span class="subtask-info">
+                              <span class="subtask-name">{st.titel}</span>
+                              {#if st.aufwand}<span class="subtask-aufwand">{st.aufwand}h</span>{/if}
+                            </span>
+                            <span class="subtask-check">✓</span>
+                          </button>
+                        </form>
+                      {/each}
+                    </div>
+                  {/if}
+                </div>
+              {/if}
             </td>
             <td data-label="Modul">{d.modul}</td>
             <td data-label="Deadline">{new Date(d.deadline).toLocaleDateString("de-CH")}</td>
             <td data-label="Tage">
-              {#if tageVerbleibend(d.deadline) < 0}
+              {#if d.status === 'erledigt'}
+                <span class="badge ok">✅ Erledigt</span>
+              {:else if tageVerbleibend(d.deadline) < 0}
                 <span class="badge rot">
                   <span class="pulse-dot"></span> Überfällig
                 </span>
@@ -295,42 +339,71 @@
               {/if}
             </td>
             <td data-label="Priorität"><span class="prio {d.prioritaet}">{d.prioritaet}</span></td>
-            <td data-label="Status"><span class="status-badge {d.status}">{d.status}</span></td>
-            <td data-label="Fortschritt" class="fortschritt-zelle">
-              {#if fortschrittEdit === d.id}
-                <form method="POST" action="?/fortschritt"
-                  use:enhance={() => {
-                    return async ({ result, update }) => {
-                      if (result.type === "success") {
-                        addToast("Fortschritt aktualisiert ✓");
-                        fortschrittEdit = null;
-                        await update({ reset: false });
-                      }
-                    };
-                  }}
-                >
-                  <input type="hidden" name="id" value={d.id} />
-                  <div class="fortschritt-popup">
-                    <input type="range" name="fortschritt" min="0" max="100" step="5"
-                      bind:value={fortschrittWerte[d.id]} class="range-mini" />
-                    <span class="pct-label">{fortschrittWerte[d.id]}%</span>
-                    <button type="submit" class="btn-save">✓</button>
-                    <button type="button" class="btn-cancel" on:click={() => { fortschrittEdit = null; fortschrittWerte[d.id] = d.fortschritt; }}>✕</button>
-                  </div>
-                </form>
+            <td data-label="Status">
+              {#if d.status === 'erledigt'}
+                <span class="status-badge erledigt">✅ Erledigt</span>
               {:else}
-                <button class="fortschritt-btn" on:click={() => { fortschrittWerte[d.id] = d.fortschritt; fortschrittEdit = d.id; }} title="Klicken zum Bearbeiten">
-                  <div class="mini-bar-bg">
-                    <div class="mini-bar-fill" style="width: {d.fortschritt}%; background: {d.fortschritt === 100 ? '#27ae60' : d.fortschritt >= 50 ? '#f39c12' : '#e94560'}"></div>
-                  </div>
-                  <span class="pct-text">{d.fortschritt}%</span>
-                </button>
+                <span class="status-badge {d.status}">{d.status}</span>
+              {/if}
+            </td>
+            <td data-label="Fortschritt" class="fortschritt-zelle">
+              {#if d.status !== 'erledigt'}
+                {#if fortschrittEdit === d.id}
+                  <form method="POST" action="?/fortschritt"
+                    use:enhance={() => {
+                      return async ({ result, update }) => {
+                        if (result.type === "success") {
+                          addToast("Fortschritt aktualisiert ✓");
+                          fortschrittEdit = null;
+                          await update({ reset: false });
+                        }
+                      };
+                    }}
+                  >
+                    <input type="hidden" name="id" value={d.id} />
+                    <div class="fortschritt-popup">
+                      <input type="range" name="fortschritt" min="0" max="100" step="5"
+                        bind:value={fortschrittWerte[d.id]} class="range-mini" />
+                      <span class="pct-label">{fortschrittWerte[d.id]}%</span>
+                      <button type="submit" class="btn-save">✓</button>
+                      <button type="button" class="btn-cancel" on:click={() => { fortschrittEdit = null; fortschrittWerte[d.id] = d.fortschritt; }}>✕</button>
+                    </div>
+                  </form>
+                {:else}
+                  <button class="fortschritt-btn" on:click={() => { fortschrittWerte[d.id] = d.fortschritt; fortschrittEdit = d.id; }} title="Klicken zum Bearbeiten">
+                    <div class="mini-bar-bg">
+                      <div class="mini-bar-fill" style="width: {d.fortschritt}%; background: {d.fortschritt === 100 ? '#27ae60' : d.fortschritt >= 50 ? '#f39c12' : '#e94560'}"></div>
+                    </div>
+                    <span class="pct-text">{d.fortschritt}%</span>
+                  </button>
+                {/if}
+              {:else}
+                <div class="mini-bar-bg"><div class="mini-bar-fill" style="width: 100%; background: #27ae60;"></div></div>
               {/if}
             </td>
             <td data-label="Aktionen">
               <div class="aktionen">
                 <a href="/deadline/{d.id}" class="btn-icon" title="Details">👁️</a>
                 <a href="/bearbeiten/{d.id}" class="btn-icon" title="Bearbeiten">✏️</a>
+                <!-- Status Toggle -->
+                <form method="POST" action="?/statusToggle"
+                  use:enhance={() => {
+                    return async ({ result, update }) => {
+                      if (result.type === "success") {
+                        addToast(d.status === 'erledigt' ? "Wieder geöffnet" : "Als erledigt markiert ✅");
+                        await update({ reset: false });
+                      }
+                    };
+                  }}
+                >
+                  <input type="hidden" name="id" value={d.id} />
+                  <input type="hidden" name="status" value={d.status} />
+                  <button
+                    type="submit"
+                    class="btn-icon"
+                    title={d.status === 'erledigt' ? 'Wieder öffnen' : 'Als erledigt markieren'}
+                  >{d.status === 'erledigt' ? '↩️' : '✅'}</button>
+                </form>
                 <form method="POST" action="?/loeschen"
                   use:enhance={({ cancel }) => {
                     if (!confirm("Deadline wirklich löschen?")) { cancel(); return; }
@@ -559,13 +632,13 @@
   h1 { color: #1a1a2e; }
   .subtitle { color: #666; margin: 0.25rem 0 0; font-size: 0.9rem; }
   .header-rechts { display: flex; gap: 0.5rem; align-items: center; align-self: center; }
-  .archiv-link, .export-btn {
+  .export-btn {
     background: white; color: #555; text-decoration: none;
     padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08); white-space: nowrap;
     border: 1px solid rgba(0,0,0,0.06); transition: all 0.15s;
   }
-  .archiv-link:hover, .export-btn:hover { background: #f0f2f5; transform: translateY(-1px); }
+  .export-btn:hover { background: #f0f2f5; transform: translateY(-1px); }
 
   .warnungen-container { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
   .warnung-banner {
@@ -662,6 +735,12 @@
   tr { transition: background 0.12s ease; }
   tr:hover { background: #f8f9ff; }
 
+  /* Erledigt-Zeile */
+  tr.zeile-erledigt { opacity: 0.55; }
+  tr.zeile-erledigt:hover { opacity: 0.75; }
+  .erledigt-haken { margin-right: 0.3rem; }
+  .durchgestrichen { text-decoration: line-through; }
+
   .titel-link { color: #1a1a2e; text-decoration: none; font-weight: 600; }
   .titel-link:hover { color: #e94560; }
   .typ-pill {
@@ -675,6 +754,38 @@
     font-weight: 600; border: 1px solid rgba(39,174,96,0.2);
   }
   .subtask-pill.subtask-done { background: #eafaf1; color: #1a9e55; }
+
+  /* Subtask-Dropdown */
+  .subtask-bereich { position: relative; margin-top: 0.35rem; }
+  .subtask-dropdown-btn {
+    font-size: 0.72rem; color: #5c6bc0; background: #eef2ff;
+    border: 1px solid rgba(92,107,192,0.2); border-radius: 6px;
+    padding: 0.2rem 0.55rem; cursor: pointer; font-weight: 600;
+    transition: background 0.15s;
+  }
+  .subtask-dropdown-btn:hover { background: #e0e7ff; }
+  .subtask-dropdown {
+    position: absolute; top: calc(100% + 4px); left: 0;
+    background: white; border: 1px solid #e0e0e0; border-radius: 10px;
+    min-width: 220px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    z-index: 50; padding: 0.4rem;
+    animation: dropIn 0.15s ease;
+  }
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .subtask-zeile {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 0.5rem 0.7rem; border: none; background: none;
+    cursor: pointer; border-radius: 7px; font-family: inherit;
+    transition: background 0.12s;
+  }
+  .subtask-zeile:hover { background: #f0fff4; }
+  .subtask-info { display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+  .subtask-name { font-size: 0.82rem; font-weight: 600; color: #1a1a2e; }
+  .subtask-aufwand { font-size: 0.72rem; color: #888; }
+  .subtask-check { color: #27ae60; font-weight: 700; font-size: 0.9rem; }
 
   /* Badges */
   .badge {

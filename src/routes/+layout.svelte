@@ -8,7 +8,7 @@
   let notifOffen = false;
   let userMenuOffen = false;
 
-  let aiOffen = false;
+  let aiOffen = true;
   let aiInput = "";
   let loading = false;
   let ungeleseneNachrichten = 0;
@@ -18,6 +18,13 @@
       content: "👋 Hallo! Ich bin dein KI-Assistent.\nIch kenne deine Deadlines und helfe dir beim Planen!"
     }
   ];
+
+  function neuesGespraech() {
+    messages = [{
+      role: 'assistant',
+      content: '👋 Hallo! Neues Gespräch gestartet. Wie kann ich helfen?'
+    }];
+  }
 
   onMount(() => {
     const saved = localStorage.getItem("theme") || "dark";
@@ -233,11 +240,21 @@
     <!-- ═══ TAB-LEISTE ═══ -->
     <nav class="navbar-tabs">
       <a href="/" class:active={$page.url.pathname === "/"}>🏠 Übersicht</a>
-      <a href="/tagesplanung" class:active={$page.url.pathname === "/tagesplanung"}>📋 Tagesplanung</a>
-      <a href="/kalender" class:active={$page.url.pathname === "/kalender"}>📅 Kalender</a>
-      <a href="/module" class:active={$page.url.pathname === "/module"}>📚 Module</a>
-      <a href="/statistik" class:active={$page.url.pathname === "/statistik"}>📊 Statistik</a>
-      <a href="/archiv" class:active={$page.url.pathname === "/archiv"}>🗂️ Archiv</a>
+      {#if data.navbarSettings?.tagesplanung !== false}
+        <a href="/tagesplanung" class:active={$page.url.pathname === "/tagesplanung"}>📋 Tagesplanung</a>
+      {/if}
+      {#if data.navbarSettings?.kalender !== false}
+        <a href="/kalender" class:active={$page.url.pathname === "/kalender"}>📅 Kalender</a>
+      {/if}
+      {#if data.navbarSettings?.module !== false}
+        <a href="/module" class:active={$page.url.pathname === "/module"}>📚 Module</a>
+      {/if}
+      {#if data.navbarSettings?.statistik !== false}
+        <a href="/statistik" class:active={$page.url.pathname === "/statistik"}>📊 Statistik</a>
+      {/if}
+      {#if data.navbarSettings?.archiv !== false}
+        <a href="/archiv" class:active={$page.url.pathname === "/archiv"}>🗂️ Archiv</a>
+      {/if}
     </nav>
 
     <!-- ═══ HAUPTINHALT ═══ -->
@@ -263,7 +280,10 @@
               <p class="ai-status">● Online</p>
             </div>
           </div>
-          <button on:click={toggleAI} class="ai-close" type="button">✕</button>
+          <div class="ai-header-rechts">
+            <button on:click={neuesGespraech} class="ai-neu" type="button" title="Neues Gespräch">🔄</button>
+            <button on:click={toggleAI} class="ai-close" type="button">✕</button>
+          </div>
         </div>
 
         <div class="ai-messages" id="aiMessages">
@@ -869,6 +889,12 @@
   }
   .ai-title { font-weight: 700; font-size: 0.9rem; margin: 0; }
   .ai-status { font-size: 0.75rem; margin: 0; opacity: 0.85; }
+  .ai-header-rechts {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .ai-neu,
   .ai-close {
     background: none;
     border: none;
@@ -879,6 +905,7 @@
     border-radius: 6px;
     line-height: 1;
   }
+  .ai-neu:hover,
   .ai-close:hover { background: rgba(255,255,255,0.2); }
 
   .ai-messages {

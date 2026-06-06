@@ -1,6 +1,5 @@
 import { getDb } from "$lib/db.js";
 import { redirect, fail } from "@sveltejs/kit";
-import { sendDeadlineWarning } from "$lib/email.js";
 
 export const actions = {
   default: async ({ request, locals }) => {
@@ -17,6 +16,27 @@ export const actions = {
       return fail(400, { error: "Alle Felder sind erforderlich" });
     }
 
+    // Subtasks parsen
+    let subtasks = [];
+    try {
+      const raw = data.get("subtasksJson");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        subtasks = parsed
+          .filter((s) => s.titel?.trim())
+          .map((s) => ({
+            id: crypto.randomUUID(),
+            titel: s.titel.trim(),
+            aufwand: s.aufwand ? Number(s.aufwand) : 0,
+            datum: s.datum || null,
+            erledigt: false,
+            erledigtAm: null,
+          }));
+      }
+    } catch {
+      // Ungültige Subtasks werden ignoriert
+    }
+
     const notizen = data.get("notizen")?.trim() || null;
     const db = await getDb();
     await db.collection("deadlines").insertOne({
@@ -29,21 +49,11 @@ export const actions = {
       typ: data.get("typ") || "Sonstiges",
       fortschritt: Math.min(100, Math.max(0, Number(data.get("fortschritt")) || 0)),
       notizen: notizen ? notizen.slice(0, 500) : null,
+      subtasks,
       userId: locals.user._id.toString(),
       erstellt: new Date(),
     });
 
-    // E-Mail bei hoher Priorität (notificationSettings ist top-level am User)
-    if (
-      prioritaet === "hoch" &&
-      locals.user.notificationSettings?.highPriority &&
-      locals.user.email
-    ) {
-      const heute = new Date();
-      const tage = Math.ceil((new Date(deadline) - heute) / (1000 * 60 * 60 * 24));
-      await sendDeadlineWarning(locals.user.email, titel, modul, deadline, tage);
-    }
-
-    redirect(303, "/");
+    throw redirect(303, "/");
   },
 };

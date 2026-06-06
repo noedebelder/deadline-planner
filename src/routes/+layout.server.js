@@ -2,7 +2,7 @@ import { getDb } from "$lib/db.js";
 
 export async function load({ locals }) {
   if (!locals.user) {
-    return { user: null, baldFaellig: 0, benachrichtigungen: [] };
+    return { user: null, baldFaellig: 0, benachrichtigungen: [], navbarSettings: null };
   }
 
   try {
@@ -37,6 +37,8 @@ export async function load({ locals }) {
       };
     });
 
+    const navbarSettings = locals.user.navbarSettings || {};
+
     return {
       user: {
         id: locals.user._id.toString(),
@@ -45,6 +47,13 @@ export async function load({ locals }) {
       },
       baldFaellig: benachrichtigungen.length,
       benachrichtigungen,
+      navbarSettings: {
+        tagesplanung: navbarSettings.tagesplanung ?? true,
+        kalender: navbarSettings.kalender ?? true,
+        module: navbarSettings.module ?? true,
+        statistik: navbarSettings.statistik ?? true,
+        archiv: navbarSettings.archiv ?? true,
+      },
     };
   } catch {
     return {
@@ -55,6 +64,13 @@ export async function load({ locals }) {
       },
       baldFaellig: 0,
       benachrichtigungen: [],
+      navbarSettings: {
+        tagesplanung: true,
+        kalender: true,
+        module: true,
+        statistik: true,
+        archiv: true,
+      },
     };
   }
 }

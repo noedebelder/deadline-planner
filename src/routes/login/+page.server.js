@@ -14,8 +14,8 @@ async function adminErstellen() {
       password: hash,
       role: "admin",
       erstellt: new Date(),
-      notificationSettings: { highPriority: true, overdue: true, dailySummary: false },
-      settings: { defaultPriority: "mittel", defaultStatus: "offen", language: "de" },
+      notificationSettings: { nearDeadline: false, overdue: false },
+      settings: { defaultPriority: "mittel", defaultStatus: "offen" },
     });
   } else if (!existing.email) {
     await db
@@ -45,6 +45,7 @@ export const actions = {
     cookies.set("userId", user._id.toString(), {
       path: "/",
       httpOnly: true,
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
     });
 
@@ -85,13 +86,14 @@ export const actions = {
       password: hash,
       role: "user",
       erstellt: new Date(),
-      notificationSettings: { highPriority: true, overdue: true, dailySummary: false },
-      settings: { defaultPriority: "mittel", defaultStatus: "offen", language: "de" },
+      notificationSettings: { nearDeadline: false, overdue: false },
+      settings: { defaultPriority: "mittel", defaultStatus: "offen" },
     });
 
     cookies.set("userId", result.insertedId.toString(), {
       path: "/",
       httpOnly: true,
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
     });
 

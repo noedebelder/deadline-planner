@@ -7,6 +7,16 @@
   let ladenPasswort = false;
   let ladenBenach = false;
   let ladenStandard = false;
+  let ladenNavbar = false;
+
+  // Navbar-Toggles initialisieren
+  let navbarSettings = {
+    tagesplanung: data.navbarSettings?.tagesplanung ?? true,
+    kalender: data.navbarSettings?.kalender ?? true,
+    module: data.navbarSettings?.module ?? true,
+    statistik: data.navbarSettings?.statistik ?? true,
+    archiv: data.navbarSettings?.archiv ?? true,
+  };
 </script>
 
 <div class="header">
@@ -37,7 +47,7 @@
       </label>
       <label>
         E-Mail-Adresse
-        <input type="email" name="email" value={data.profil.email} required />
+        <input type="email" name="email" value={data.profil.email} />
       </label>
       <button type="submit" class="btn-primary" disabled={ladenProfil}>
         {ladenProfil ? "Speichern…" : "💾 Speichern"}
@@ -94,27 +104,19 @@
       <div class="toggle-gruppe">
         <label class="toggle-zeile">
           <div class="toggle-text">
-            <span class="toggle-titel">Hohe Priorität</span>
-            <span class="toggle-sub">E-Mail wenn neue Deadline mit Priorität "hoch" erstellt wird</span>
+            <span class="toggle-titel">Deadline in &lt; 1 Tag</span>
+            <span class="toggle-sub">E-Mail wenn eine Deadline heute oder morgen fällig ist</span>
           </div>
-          <input type="checkbox" name="highPriority" class="toggle-input"
-            checked={data.notificationSettings.highPriority} />
+          <input type="checkbox" name="nearDeadline" class="toggle-input"
+            checked={data.notificationSettings.nearDeadline} />
         </label>
         <label class="toggle-zeile">
           <div class="toggle-text">
             <span class="toggle-titel">Überfällige Deadlines</span>
-            <span class="toggle-sub">E-Mail bei Deadlines die in ≤ 3 Tagen fällig sind</span>
+            <span class="toggle-sub">E-Mail bei Deadlines die bereits abgelaufen sind</span>
           </div>
           <input type="checkbox" name="overdue" class="toggle-input"
             checked={data.notificationSettings.overdue} />
-        </label>
-        <label class="toggle-zeile">
-          <div class="toggle-text">
-            <span class="toggle-titel">Tägliche Zusammenfassung</span>
-            <span class="toggle-sub">Jeden Morgen eine Übersicht aller offenen Deadlines</span>
-          </div>
-          <input type="checkbox" name="dailySummary" class="toggle-input"
-            checked={data.notificationSettings.dailySummary} />
         </label>
       </div>
       <button type="submit" class="btn-primary" disabled={ladenBenach}>
@@ -151,15 +153,70 @@
           <option value="in-bearbeitung" selected={data.settings.defaultStatus === "in-bearbeitung"}>In Bearbeitung</option>
         </select>
       </label>
-      <label>
-        Sprache / Language
-        <select name="language">
-          <option value="de" selected={data.settings.language === "de"}>🇩🇪 Deutsch</option>
-          <option value="en" selected={data.settings.language === "en"}>🇬🇧 English</option>
-        </select>
-      </label>
       <button type="submit" class="btn-primary" disabled={ladenStandard}>
         {ladenStandard ? "Speichern…" : "💾 Speichern"}
+      </button>
+    </form>
+  </section>
+
+  <!-- NAVIGATION ANPASSEN -->
+  <section class="card card-breit">
+    <h2>🧭 Navigation anpassen</h2>
+    <p class="card-sub">Wähle welche Seiten in der Tab-Leiste angezeigt werden</p>
+
+    {#if form?.navbarSuccess}
+      <div class="erfolg">✅ Navigation gespeichert!</div>
+    {/if}
+
+    <form method="POST" action="?/navbar" use:enhance={() => {
+      ladenNavbar = true;
+      return async ({ update }) => { await update(); ladenNavbar = false; };
+    }}>
+      <div class="toggle-gruppe">
+        <label class="toggle-zeile">
+          <div class="toggle-text">
+            <span class="toggle-titel">📋 Tagesplanung</span>
+            <span class="toggle-sub">Smarte Tagesplanung nach Aufwand</span>
+          </div>
+          <input type="checkbox" name="tagesplanung" class="toggle-input"
+            bind:checked={navbarSettings.tagesplanung} />
+        </label>
+        <label class="toggle-zeile">
+          <div class="toggle-text">
+            <span class="toggle-titel">📅 Kalender</span>
+            <span class="toggle-sub">Kalenderansicht aller Deadlines</span>
+          </div>
+          <input type="checkbox" name="kalender" class="toggle-input"
+            bind:checked={navbarSettings.kalender} />
+        </label>
+        <label class="toggle-zeile">
+          <div class="toggle-text">
+            <span class="toggle-titel">📚 Module</span>
+            <span class="toggle-sub">Deadlines nach Modul gruppiert</span>
+          </div>
+          <input type="checkbox" name="module" class="toggle-input"
+            bind:checked={navbarSettings.module} />
+        </label>
+        <label class="toggle-zeile">
+          <div class="toggle-text">
+            <span class="toggle-titel">📊 Statistik</span>
+            <span class="toggle-sub">Auswertungen und Diagramme</span>
+          </div>
+          <input type="checkbox" name="statistik" class="toggle-input"
+            bind:checked={navbarSettings.statistik} />
+        </label>
+        <label class="toggle-zeile">
+          <div class="toggle-text">
+            <span class="toggle-titel">🗂️ Archiv</span>
+            <span class="toggle-sub">Erledigte Deadlines archiviert</span>
+          </div>
+          <input type="checkbox" name="archiv" class="toggle-input"
+            bind:checked={navbarSettings.archiv} />
+        </label>
+      </div>
+      <p class="nav-hinweis">🏠 Übersicht und + Neue Deadline sind immer sichtbar.</p>
+      <button type="submit" class="btn-primary" disabled={ladenNavbar}>
+        {ladenNavbar ? "Speichern…" : "💾 Navigation speichern"}
       </button>
     </form>
   </section>
@@ -177,9 +234,13 @@
     gap: 1.5rem;
     align-items: start;
   }
+  .card-breit {
+    grid-column: 1 / -1;
+  }
 
   @media (max-width: 750px) {
     .einstellungen-grid { grid-template-columns: 1fr; }
+    .card-breit { grid-column: auto; }
   }
 
   .card {
@@ -331,6 +392,16 @@
     transform: translateX(18px);
   }
 
+  .nav-hinweis {
+    font-size: 0.8rem;
+    color: #888;
+    background: #f8f9ff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 7px;
+    margin: 0;
+    border: 1px solid rgba(92,107,192,0.12);
+  }
+
   /* Dark Mode */
   :global([data-theme="dark"]) .card {
     background: rgba(22, 27, 34, 0.85) !important;
@@ -360,4 +431,5 @@
   :global([data-theme="dark"]) .toggle-input:checked { background: #e94560 !important; }
   :global([data-theme="dark"]) .erfolg { background: rgba(18,61,26,0.8) !important; color: #4ade80 !important; }
   :global([data-theme="dark"]) .fehler { background: rgba(61,18,18,0.8) !important; color: #f87171 !important; }
+  :global([data-theme="dark"]) .nav-hinweis { background: rgba(30,45,74,0.4) !important; color: #8b949e !important; border-color: rgba(92,107,192,0.2) !important; }
 </style>

@@ -9,6 +9,7 @@ export async function load({ locals }) {
 
   const notif = locals.user.notificationSettings || {};
   const settings = locals.user.settings || {};
+  const navbarSettings = locals.user.navbarSettings || {};
 
   return {
     profil: {
@@ -16,14 +17,19 @@ export async function load({ locals }) {
       email: locals.user.email || "",
     },
     notificationSettings: {
-      highPriority: notif.highPriority ?? true,
-      overdue: notif.overdue ?? true,
-      dailySummary: notif.dailySummary ?? false,
+      nearDeadline: notif.nearDeadline ?? false,
+      overdue: notif.overdue ?? false,
     },
     settings: {
       defaultPriority: settings.defaultPriority || "mittel",
       defaultStatus: settings.defaultStatus || "offen",
-      language: settings.language || "de",
+    },
+    navbarSettings: {
+      tagesplanung: navbarSettings.tagesplanung ?? true,
+      kalender: navbarSettings.kalender ?? true,
+      module: navbarSettings.module ?? true,
+      statistik: navbarSettings.statistik ?? true,
+      archiv: navbarSettings.archiv ?? true,
     },
   };
 }
@@ -34,30 +40,36 @@ export const actions = {
 
     const data = await request.formData();
     const username = data.get("username")?.trim();
-    const email = data.get("email")?.trim().toLowerCase();
+    const emailRaw = data.get("email")?.trim().toLowerCase() || "";
 
     if (!username || username.length < 3) {
       return fail(400, { profilError: "Anzeigename mind. 3 Zeichen erforderlich" });
     }
-    const emailError = validateEmail(email);
-    if (emailError) {
-      return fail(400, { profilError: emailError });
+
+    // Nur validieren wenn eine E-Mail eingegeben wurde
+    const updates = { username };
+    if (emailRaw) {
+      const emailError = validateEmail(emailRaw);
+      if (emailError) {
+        return fail(400, { profilError: emailError });
+      }
+      const db = await getDb();
+      const other = await db.collection("users").findOne({
+        email: emailRaw,
+        _id: { $ne: new ObjectId(locals.user._id.toString()) },
+      });
+      if (other) {
+        return fail(400, { profilError: "E-Mail-Adresse bereits vergeben" });
+      }
+      updates.email = emailRaw;
     }
 
     const db = await getDb();
-    const other = await db.collection("users").findOne({
-      email,
-      _id: { $ne: new ObjectId(locals.user._id.toString()) },
-    });
-    if (other) {
-      return fail(400, { profilError: "E-Mail-Adresse bereits vergeben" });
-    }
-
     await db
       .collection("users")
       .updateOne(
         { _id: new ObjectId(locals.user._id.toString()) },
-        { $set: { username, email } }
+        { $set: updates }
       );
 
     return { profilSuccess: true };
@@ -100,13 +112,18 @@ export const actions = {
     if (!locals.user) throw redirect(303, "/login");
 
     const data = await request.formData();
-    await db_update(locals.user._id, {
-      notificationSettings: {
-        highPriority: data.get("highPriority") === "on",
-        overdue: data.get("overdue") === "on",
-        dailySummary: data.get("dailySummary") === "on",
-      },
-    });
+    const db = await getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(locals.user._id.toString()) },
+      {
+        $set: {
+          notificationSettings: {
+            nearDeadline: data.get("nearDeadline") === "on",
+            overdue: data.get("overdue") === "on",
+          },
+        },
+      }
+    );
 
     return { benachrichtigungenSuccess: true };
   },
@@ -117,7 +134,6 @@ export const actions = {
     const data = await request.formData();
     const defaultPriority = data.get("defaultPriority") || "mittel";
     const defaultStatus = data.get("defaultStatus") || "offen";
-    const language = data.get("language") === "en" ? "en" : "de";
 
     const db = await getDb();
     await db.collection("users").updateOne(
@@ -126,18 +142,33 @@ export const actions = {
         $set: {
           "settings.defaultPriority": defaultPriority,
           "settings.defaultStatus": defaultStatus,
-          "settings.language": language,
         },
       }
     );
 
     return { standardSuccess: true };
   },
-};
 
-async function db_update(userId, fields) {
-  const db = await getDb();
-  await db
-    .collection("users")
-    .updateOne({ _id: new ObjectId(userId.toString()) }, { $set: fields });
-}
+  navbar: async ({ request, locals }) => {
+    if (!locals.user) throw redirect(303, "/login");
+
+    const data = await request.formData();
+    const db = await getDb();
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(locals.user._id.toString()) },
+      {
+        $set: {
+          navbarSettings: {
+            tagesplanung: data.get("tagesplanung") === "on",
+            kalender: data.get("kalender") === "on",
+            module: data.get("module") === "on",
+            statistik: data.get("statistik") === "on",
+            archiv: data.get("archiv") === "on",
+          },
+        },
+      }
+    );
+
+    return { navbarSuccess: true };
+  },
+};

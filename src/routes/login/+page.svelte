@@ -1,6 +1,8 @@
 <script>
   export let form;
   let tab = form?.tab === 'register' ? 'register' : 'login';
+  let passwortSichtbar = false;
+  let passwortSichtbarReg = false;
 </script>
 
 <div class="login-wrap">
@@ -29,7 +31,20 @@
         </label>
         <label>
           Passwort
-          <input type="password" name="password" required placeholder="••••••••" autocomplete="current-password" />
+          <div class="passwort-feld">
+            <input
+              type={passwortSichtbar ? 'text' : 'password'}
+              name="password"
+              required
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-pw"
+              on:click={() => (passwortSichtbar = !passwortSichtbar)}
+            >{passwortSichtbar ? '🙈' : '👁️'}</button>
+          </div>
         </label>
         <button type="submit">Anmelden →</button>
       </form>
@@ -49,7 +64,21 @@
         </label>
         <label>
           Passwort <small>(min. 8 Zeichen, 1 Grossbuchstabe, 1 Zahl)</small>
-          <input type="password" name="password" required placeholder="••••••••" autocomplete="new-password" minlength="8" />
+          <div class="passwort-feld">
+            <input
+              type={passwortSichtbarReg ? 'text' : 'password'}
+              name="password"
+              required
+              placeholder="••••••••"
+              autocomplete="new-password"
+              minlength="8"
+            />
+            <button
+              type="button"
+              class="toggle-pw"
+              on:click={() => (passwortSichtbarReg = !passwortSichtbarReg)}
+            >{passwortSichtbarReg ? '🙈' : '👁️'}</button>
+          </div>
         </label>
         <button type="submit">Konto erstellen →</button>
       </form>
@@ -156,6 +185,28 @@
   input:focus {
     outline: none;
     border-color: #e94560;
+  }
+  .passwort-feld {
+    position: relative;
+  }
+  .passwort-feld input {
+    padding-right: 44px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .toggle-pw {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
   }
   button[type="submit"] {
     padding: 0.85rem;

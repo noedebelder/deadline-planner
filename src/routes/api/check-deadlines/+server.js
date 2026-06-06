@@ -1,5 +1,5 @@
 import { getDb } from "$lib/db.js";
-import { sendDeadlineWarning, sendDailySummary } from "$lib/email.js";
+import { sendDeadlineWarning } from "$lib/email.js";
 import { json } from "@sveltejs/kit";
 
 export async function GET({ request }) {
@@ -10,30 +10,34 @@ export async function GET({ request }) {
 
   const db = await getDb();
   const heute = new Date();
+  heute.setHours(0, 0, 0, 0);
 
-  // Alle User mit aktivierten Benachrichtigungen laden
+  // Morgen als Grenze (< 1 Tag = heute oder überfällig)
+  const morgen = new Date(heute);
+  morgen.setDate(heute.getDate() + 1);
+  const morgenStr = morgen.toISOString().split("T")[0];
+
+  // Alle User mit aktivierter nearDeadline-Benachrichtigung
   const users = await db
     .collection("users")
     .find({
-      email: { $exists: true },
-      "notificationSettings.highPriority": true,
+      email: { $exists: true, $ne: null, $ne: "" },
+      "notificationSettings.nearDeadline": true,
     })
     .toArray();
 
   let gesendet = 0;
 
   for (const user of users) {
-    // Deadlines die in <= 3 Tagen fällig sind
+    if (!user.email) continue;
+
+    // Deadlines die heute oder früher fällig sind (< 1 Tag)
     const deadlines = await db
       .collection("deadlines")
       .find({
         userId: user._id.toString(),
         status: { $ne: "erledigt" },
-        deadline: {
-          $lte: new Date(heute.getTime() + 3 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0],
-        },
+        deadline: { $lt: morgenStr },
       })
       .toArray();
 
@@ -44,28 +48,32 @@ export async function GET({ request }) {
     }
   }
 
-  // Tägliche Zusammenfassung für User mit dailySummary
-  const summaryUsers = await db
+  // Überfällige Deadlines für User mit overdue-Einstellung
+  const overdueUsers = await db
     .collection("users")
     .find({
-      email: { $exists: true },
-      "notificationSettings.dailySummary": true,
+      email: { $exists: true, $ne: null, $ne: "" },
+      "notificationSettings.overdue": true,
     })
     .toArray();
 
-  for (const user of summaryUsers) {
-    const deadlines = await db
+  const heuteStr = heute.toISOString().split("T")[0];
+
+  for (const user of overdueUsers) {
+    if (!user.email) continue;
+
+    const overdueDeadlines = await db
       .collection("deadlines")
       .find({
         userId: user._id.toString(),
         status: { $ne: "erledigt" },
+        deadline: { $lt: heuteStr },
       })
-      .sort({ deadline: 1 })
-      .limit(10)
       .toArray();
 
-    if (deadlines.length > 0) {
-      await sendDailySummary(user.email, user.username, deadlines);
+    for (const d of overdueDeadlines) {
+      const tage = Math.ceil((new Date(d.deadline) - heute) / (1000 * 60 * 60 * 24));
+      await sendDeadlineWarning(user.email, d.titel, d.modul, d.deadline, tage);
       gesendet++;
     }
   }
