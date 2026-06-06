@@ -1,39 +1,60 @@
 import { getDb } from "$lib/db.js";
 
 export async function load({ locals }) {
-  let baldFaellig = 0;
-
-  if (locals.user) {
-    try {
-      const db = await getDb();
-      const heute = new Date();
-      heute.setHours(0, 0, 0, 0);
-      const inDreiTagen = new Date(heute);
-      inDreiTagen.setDate(heute.getDate() + 3);
-
-      const heuteStr = heute.toISOString().split("T")[0];
-      const inDreiTagenStr = inDreiTagen.toISOString().split("T")[0];
-
-      const query = {
-        deadline: { $gte: heuteStr, $lte: inDreiTagenStr },
-        status: { $ne: "erledigt" },
-        userId: locals.user._id.toString(),
-      };
-
-      baldFaellig = await db.collection("deadlines").countDocuments(query);
-    } catch {
-      baldFaellig = 0;
-    }
+  if (!locals.user) {
+    return { user: null, baldFaellig: 0, benachrichtigungen: [] };
   }
 
-  return {
-    user: locals.user
-      ? {
-          id: locals.user._id.toString(),
-          username: locals.user.username,
-          role: locals.user.role,
-        }
-      : null,
-    baldFaellig,
-  };
+  try {
+    const db = await getDb();
+    const heute = new Date();
+    heute.setHours(0, 0, 0, 0);
+
+    const in3Tagen = new Date(heute);
+    in3Tagen.setDate(heute.getDate() + 3);
+    const in3TagenStr = in3Tagen.toISOString().split("T")[0];
+
+    const kritischeDeadlines = await db
+      .collection("deadlines")
+      .find({
+        userId: locals.user._id.toString(),
+        status: { $ne: "erledigt" },
+        deadline: { $lte: in3TagenStr },
+      })
+      .sort({ deadline: 1 })
+      .toArray();
+
+    const benachrichtigungen = kritischeDeadlines.map((d) => {
+      const deadlineDate = new Date(d.deadline + "T00:00:00");
+      const tage = Math.round((deadlineDate - heute) / (1000 * 60 * 60 * 24));
+      return {
+        id: d._id.toString(),
+        titel: d.titel,
+        modul: d.modul,
+        deadline: d.deadline,
+        tage,
+        typ: tage < 0 ? "ueberfaellig" : tage === 0 ? "heute" : "bald",
+      };
+    });
+
+    return {
+      user: {
+        id: locals.user._id.toString(),
+        username: locals.user.username,
+        role: locals.user.role,
+      },
+      baldFaellig: benachrichtigungen.length,
+      benachrichtigungen,
+    };
+  } catch {
+    return {
+      user: {
+        id: locals.user._id.toString(),
+        username: locals.user.username,
+        role: locals.user.role,
+      },
+      baldFaellig: 0,
+      benachrichtigungen: [],
+    };
+  }
 }

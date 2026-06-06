@@ -5,6 +5,7 @@
   export let data;
 
   let darkMode = false;
+  let notifOffen = false;
 
   onMount(() => {
     darkMode = document.documentElement.getAttribute("data-theme") === "dark";
@@ -16,7 +17,13 @@
     localStorage.setItem("theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
   }
+
+  function toggleNotif() {
+    notifOffen = !notifOffen;
+  }
 </script>
+
+<svelte:window on:click={() => (notifOffen = false)} />
 
 <!-- Navigations-Ladebalken -->
 {#if $navigating}
@@ -136,6 +143,74 @@
 
     <!-- Hauptinhalt -->
     <main class="main-content">
+
+      <!-- Top-Bar mit Benachrichtigungs-Glocke -->
+      <header class="top-bar">
+        <div class="top-bar-links"></div>
+        <div class="top-bar-rechts">
+          <div class="notification-menu">
+            <button
+              class="notif-glocke"
+              on:click|stopPropagation={toggleNotif}
+              title="Benachrichtigungen"
+              type="button"
+              class:aktiv={notifOffen}
+            >
+              🔔
+              {#if (data.benachrichtigungen?.length ?? 0) > 0}
+                <span class="notif-badge-dot">{data.benachrichtigungen.length}</span>
+              {/if}
+            </button>
+
+            {#if notifOffen}
+              <div class="notif-dropdown">
+                <div class="notif-kopf">
+                  <span class="notif-kopf-titel">Benachrichtigungen</span>
+                  <span class="notif-kopf-zaehler {(data.benachrichtigungen?.length ?? 0) === 0 ? 'leer' : ''}">
+                    {data.benachrichtigungen?.length ?? 0}
+                  </span>
+                </div>
+
+                {#if !(data.benachrichtigungen?.length)}
+                  <div class="notif-leer">✅ Keine dringenden Deadlines</div>
+                {:else}
+                  <div class="notif-liste">
+                    {#each data.benachrichtigungen as n}
+                      <a
+                        href="/deadline/{n.id}"
+                        class="notif-zeile {n.typ}"
+                        on:click={() => (notifOffen = false)}
+                      >
+                        <span class="notif-typ-icon">
+                          {#if n.typ === "ueberfaellig"}🔴{:else if n.typ === "heute"}🟠{:else}🟡{/if}
+                        </span>
+                        <div class="notif-info">
+                          <p class="notif-name">{n.titel}</p>
+                          <p class="notif-meta">
+                            {n.modul} ·
+                            {#if n.tage < 0}
+                              Überfällig seit {Math.abs(n.tage)} Tag{Math.abs(n.tage) !== 1 ? "en" : ""}
+                            {:else if n.tage === 0}
+                              Heute fällig!
+                            {:else}
+                              In {n.tage} Tag{n.tage !== 1 ? "en" : ""} fällig
+                            {/if}
+                          </p>
+                        </div>
+                        <span class="notif-pfeil">→</span>
+                      </a>
+                    {/each}
+                  </div>
+                  <a href="/" class="notif-footer-link" on:click={() => (notifOffen = false)}>
+                    Alle Deadlines ansehen →
+                  </a>
+                {/if}
+              </div>
+            {/if}
+          </div>
+        </div>
+      </header>
+
       {#key $page.url.pathname}
         <div class="page-content">
           <slot />
@@ -678,5 +753,197 @@
   @media (max-width: 480px) {
     :global(h1) { font-size: 1.6rem; }
     .main-content { padding: 0.75rem; }
+  }
+
+  /* ══════════════════════════════════════════
+     TOP-BAR (Notification-Leiste)
+  ══════════════════════════════════════════ */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    margin-bottom: 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    /* Negiert main-content padding seitlich → volle Breite */
+    margin-left: -2rem;
+    margin-right: -2rem;
+    margin-top: -2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    background: rgba(240, 242, 245, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  }
+
+  .top-bar-links { flex: 1; }
+  .top-bar-rechts { display: flex; align-items: center; gap: 0.5rem; }
+
+  /* ══════════════════════════════════════════
+     BENACHRICHTIGUNGS-GLOCKE
+  ══════════════════════════════════════════ */
+  .notification-menu { position: relative; }
+
+  .notif-glocke {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    cursor: pointer; font-size: 1.15rem;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: background 0.15s, transform 0.15s;
+    color: #1a1a2e;
+  }
+  .notif-glocke:hover { background: rgba(0, 0, 0, 0.09); transform: scale(1.05); }
+  .notif-glocke.aktiv {
+    background: rgba(233, 69, 96, 0.1);
+    border-color: rgba(233, 69, 96, 0.25);
+  }
+
+  /* Badge-Punkt auf der Glocke */
+  .notif-badge-dot {
+    position: absolute; top: -4px; right: -4px;
+    background: #e94560; color: white;
+    font-size: 0.58rem; font-weight: 700;
+    border-radius: 50%;
+    min-width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(240, 242, 245, 0.9);
+    animation: glockenPuls 2s ease-in-out infinite;
+    line-height: 1; padding: 0 2px;
+  }
+  @keyframes glockenPuls {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(233,69,96,0.5); }
+    50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(233,69,96,0); }
+  }
+
+  /* ══════════════════════════════════════════
+     DROPDOWN
+  ══════════════════════════════════════════ */
+  .notif-dropdown {
+    position: absolute;
+    right: 0; top: calc(100% + 10px);
+    width: 320px;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06);
+    overflow: hidden;
+    animation: dropIn 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 300;
+  }
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .notif-kopf {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .notif-kopf-titel { font-weight: 700; font-size: 0.9rem; color: #1a1a2e; }
+  .notif-kopf-zaehler {
+    background: #e94560; color: white;
+    font-size: 0.7rem; font-weight: 700;
+    padding: 0.15rem 0.55rem; border-radius: 20px; min-width: 22px; text-align: center;
+  }
+  .notif-kopf-zaehler.leer { background: #e0e0e0; color: #999; }
+
+  .notif-leer {
+    padding: 1.75rem 1rem;
+    text-align: center; color: #888; font-size: 0.875rem;
+  }
+
+  .notif-liste { max-height: 300px; overflow-y: auto; }
+  .notif-liste::-webkit-scrollbar { width: 4px; }
+  .notif-liste::-webkit-scrollbar-track { background: transparent; }
+  .notif-liste::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 2px; }
+
+  .notif-zeile {
+    display: flex; align-items: flex-start; gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f5f5f5;
+    text-decoration: none; color: inherit;
+    transition: background 0.12s;
+  }
+  .notif-zeile:last-child { border-bottom: none; }
+  .notif-zeile:hover { background: #f8f9ff; }
+
+  .notif-zeile.ueberfaellig { border-left: 3px solid #e74c3c; }
+  .notif-zeile.heute { border-left: 3px solid #f39c12; }
+  .notif-zeile.bald { border-left: 3px solid #f1c40f; }
+
+  .notif-typ-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+  .notif-info { flex: 1; min-width: 0; }
+  .notif-name {
+    font-size: 0.875rem; font-weight: 600; color: #1a1a2e;
+    margin: 0 0 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .notif-meta { font-size: 0.75rem; color: #888; margin: 0; }
+
+  .notif-zeile.ueberfaellig .notif-name { color: #e74c3c; }
+  .notif-zeile.heute .notif-name { color: #e67e22; }
+
+  .notif-pfeil { color: #ccc; font-size: 0.85rem; align-self: center; flex-shrink: 0; }
+
+  .notif-footer-link {
+    display: block; text-align: center;
+    padding: 0.7rem; font-size: 0.82rem;
+    color: #e94560; text-decoration: none; font-weight: 600;
+    border-top: 1px solid #f0f0f0;
+    background: #fafbff;
+    transition: background 0.12s;
+  }
+  .notif-footer-link:hover { background: #f0f2ff; }
+
+  /* Dark Mode – Top-Bar & Dropdown */
+  :global([data-theme="dark"]) .top-bar {
+    background: rgba(13, 17, 23, 0.9) !important;
+    border-bottom-color: rgba(255,255,255,0.06) !important;
+  }
+  :global([data-theme="dark"]) .notif-glocke {
+    background: rgba(255,255,255,0.08) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+    color: #e6edf3 !important;
+  }
+  :global([data-theme="dark"]) .notif-glocke:hover { background: rgba(255,255,255,0.12) !important; }
+  :global([data-theme="dark"]) .notif-glocke.aktiv {
+    background: rgba(233,69,96,0.15) !important;
+    border-color: rgba(233,69,96,0.3) !important;
+  }
+  :global([data-theme="dark"]) .notif-badge-dot { border-color: rgba(13,17,23,0.9) !important; }
+  :global([data-theme="dark"]) .notif-dropdown {
+    background: rgba(22,27,34,0.98) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08) !important;
+  }
+  :global([data-theme="dark"]) .notif-kopf { border-bottom-color: rgba(255,255,255,0.08) !important; }
+  :global([data-theme="dark"]) .notif-kopf-titel { color: #e6edf3 !important; }
+  :global([data-theme="dark"]) .notif-zeile { border-bottom-color: rgba(255,255,255,0.05) !important; }
+  :global([data-theme="dark"]) .notif-zeile:hover { background: rgba(255,255,255,0.04) !important; }
+  :global([data-theme="dark"]) .notif-name { color: #e6edf3 !important; }
+  :global([data-theme="dark"]) .notif-zeile.ueberfaellig .notif-name { color: #f87171 !important; }
+  :global([data-theme="dark"]) .notif-zeile.heute .notif-name { color: #fbbf24 !important; }
+  :global([data-theme="dark"]) .notif-footer-link { background: rgba(13,17,23,0.5) !important; border-top-color: rgba(255,255,255,0.08) !important; }
+  :global([data-theme="dark"]) .notif-footer-link:hover { background: rgba(30,45,74,0.5) !important; }
+  :global([data-theme="dark"]) .notif-leer { color: #4d5566 !important; }
+
+  @media (max-width: 768px) {
+    .top-bar {
+      margin-left: -1rem; margin-right: -1rem;
+      margin-top: -1rem;
+      padding-left: 1rem; padding-right: 1rem;
+    }
+    .notif-dropdown { width: 290px; right: -8px; }
+  }
+  @media (max-width: 480px) {
+    .top-bar { margin-left: -0.75rem; margin-right: -0.75rem; padding-left: 0.75rem; padding-right: 0.75rem; }
+    .notif-dropdown { width: calc(100vw - 2rem); right: -0.75rem; }
   }
 </style>
