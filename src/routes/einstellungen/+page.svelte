@@ -9,6 +9,8 @@
   let ladenStandard = false;
   let ladenNavbar = false;
 
+  let nearDeadline = data.notificationSettings?.nearDeadline ?? false;
+
   $: navbarSettings = {
     tagesplanung: data.navbarSettings?.tagesplanung ?? true,
     kalender: data.navbarSettings?.kalender ?? true,
@@ -106,16 +108,13 @@
             <span class="toggle-titel">Deadline in &lt; 1 Tag</span>
             <span class="toggle-sub">E-Mail wenn eine Deadline heute oder morgen fällig ist</span>
           </div>
-          <input type="checkbox" name="nearDeadline" class="toggle-input"
-            checked={data.notificationSettings.nearDeadline} />
-        </label>
-        <label class="toggle-zeile">
-          <div class="toggle-text">
-            <span class="toggle-titel">Überfällige Deadlines</span>
-            <span class="toggle-sub">E-Mail bei Deadlines die bereits abgelaufen sind</span>
-          </div>
-          <input type="checkbox" name="overdue" class="toggle-input"
-            checked={data.notificationSettings.overdue} />
+          <input
+            type="checkbox"
+            name="nearDeadline"
+            value="true"
+            class="toggle-input"
+            bind:checked={nearDeadline}
+          />
         </label>
       </div>
       <button type="submit" class="btn-primary" disabled={ladenBenach}>
@@ -139,17 +138,28 @@
     }}>
       <label>
         Standard-Priorität
-        <select name="defaultPriority">
-          <option value="hoch" selected={data.settings.defaultPriority === "hoch"}>Hoch</option>
-          <option value="mittel" selected={data.settings.defaultPriority === "mittel"}>Mittel</option>
-          <option value="niedrig" selected={data.settings.defaultPriority === "niedrig"}>Niedrig</option>
+        <select name="defaultPrioritaet">
+          <option value="hoch" selected={data.defaultSettings.prioritaet === "hoch"}>🔴 Hoch</option>
+          <option value="mittel" selected={data.defaultSettings.prioritaet === "mittel"}>🟡 Mittel</option>
+          <option value="niedrig" selected={data.defaultSettings.prioritaet === "niedrig"}>🟢 Niedrig</option>
         </select>
       </label>
       <label>
         Standard-Status
         <select name="defaultStatus">
-          <option value="offen" selected={data.settings.defaultStatus === "offen"}>Offen</option>
-          <option value="in-bearbeitung" selected={data.settings.defaultStatus === "in-bearbeitung"}>In Bearbeitung</option>
+          <option value="offen" selected={data.defaultSettings.status === "offen"}>📋 Offen</option>
+          <option value="in-bearbeitung" selected={data.defaultSettings.status === "in-bearbeitung"}>⚙️ In Bearbeitung</option>
+          <option value="erledigt" selected={data.defaultSettings.status === "erledigt"}>✅ Erledigt</option>
+        </select>
+      </label>
+      <label>
+        Standard-Typ
+        <select name="defaultTyp">
+          <option value="Prüfung" selected={data.defaultSettings.typ === "Prüfung"}>📝 Prüfung</option>
+          <option value="Projekt" selected={data.defaultSettings.typ === "Projekt"}>🔨 Projekt</option>
+          <option value="Übung" selected={data.defaultSettings.typ === "Übung"}>📚 Übung</option>
+          <option value="Seminararbeit" selected={data.defaultSettings.typ === "Seminararbeit"}>📄 Seminararbeit</option>
+          <option value="Sonstiges" selected={data.defaultSettings.typ === "Sonstiges" || !data.defaultSettings.typ}>📌 Sonstiges</option>
         </select>
       </label>
       <button type="submit" class="btn-primary" disabled={ladenStandard}>

@@ -10,9 +10,8 @@ export async function load({ locals }) {
   const db = await getDb();
   const user = await db.collection("users").findOne({ _id: new ObjectId(locals.user._id.toString()) });
 
-  const notif = user.notificationSettings || {};
-  const settings = user.settings || {};
   const nav = user.navbarSettings || {};
+  const def = user.defaultSettings || {};
 
   return {
     profil: {
@@ -20,12 +19,12 @@ export async function load({ locals }) {
       email: user.email || "",
     },
     notificationSettings: {
-      nearDeadline: notif.nearDeadline ?? false,
-      overdue: notif.overdue ?? false,
+      nearDeadline: user.notificationSettings?.nearDeadline ?? false,
     },
-    settings: {
-      defaultPriority: settings.defaultPriority || "mittel",
-      defaultStatus: settings.defaultStatus || "offen",
+    defaultSettings: {
+      prioritaet: def.prioritaet || "mittel",
+      status: def.status || "offen",
+      typ: def.typ || "Sonstiges",
     },
     navbarSettings: {
       tagesplanung: nav.tagesplanung ?? true,
@@ -52,28 +51,22 @@ export const actions = {
     const updates = { username };
     if (emailRaw) {
       const emailError = validateEmail(emailRaw);
-      if (emailError) {
-        return fail(400, { profilError: emailError });
-      }
+      if (emailError) return fail(400, { profilError: emailError });
+
       const db = await getDb();
       const other = await db.collection("users").findOne({
         email: emailRaw,
         _id: { $ne: new ObjectId(locals.user._id.toString()) },
       });
-      if (other) {
-        return fail(400, { profilError: "E-Mail-Adresse bereits vergeben" });
-      }
+      if (other) return fail(400, { profilError: "E-Mail-Adresse bereits vergeben" });
       updates.email = emailRaw;
     }
 
     const db = await getDb();
-    await db
-      .collection("users")
-      .updateOne(
-        { _id: new ObjectId(locals.user._id.toString()) },
-        { $set: updates }
-      );
-
+    await db.collection("users").updateOne(
+      { _id: new ObjectId(locals.user._id.toString()) },
+      { $set: updates }
+    );
     return { profilSuccess: true };
   },
 
@@ -85,28 +78,20 @@ export const actions = {
     const neuesPasswort = data.get("neues_passwort");
     const bestaetigen = data.get("bestaetigen");
 
-    if (neuesPasswort !== bestaetigen) {
+    if (neuesPasswort !== bestaetigen)
       return fail(400, { passwortError: "Die Passwörter stimmen nicht überein" });
-    }
+
     const pwError = validatePassword(neuesPasswort);
-    if (pwError) {
-      return fail(400, { passwortError: pwError });
-    }
+    if (pwError) return fail(400, { passwortError: pwError });
 
     const db = await getDb();
-    const user = await db
-      .collection("users")
-      .findOne({ _id: new ObjectId(locals.user._id.toString()) });
+    const user = await db.collection("users").findOne({ _id: new ObjectId(locals.user._id.toString()) });
 
-    if (!(await bcrypt.compare(altesPasswort, user.password))) {
+    if (!(await bcrypt.compare(altesPasswort, user.password)))
       return fail(400, { passwortError: "Aktuelles Passwort ist falsch" });
-    }
 
     const hash = await bcrypt.hash(neuesPasswort, 10);
-    await db
-      .collection("users")
-      .updateOne({ _id: user._id }, { $set: { password: hash } });
-
+    await db.collection("users").updateOne({ _id: user._id }, { $set: { password: hash } });
     return { passwortSuccess: true };
   },
 
@@ -117,38 +102,29 @@ export const actions = {
     const db = await getDb();
     await db.collection("users").updateOne(
       { _id: new ObjectId(locals.user._id.toString()) },
-      {
-        $set: {
-          notificationSettings: {
-            nearDeadline: data.get("nearDeadline") === "on",
-            overdue: data.get("overdue") === "on",
-          },
-        },
-      }
+      { $set: { "notificationSettings.nearDeadline": data.get("nearDeadline") === "true" } }
     );
-
-    return { benachrichtigungenSuccess: true };
+    throw redirect(303, "/einstellungen");
   },
 
   standard: async ({ request, locals }) => {
     if (!locals.user) throw redirect(303, "/login");
 
     const data = await request.formData();
-    const defaultPriority = data.get("defaultPriority") || "mittel";
-    const defaultStatus = data.get("defaultStatus") || "offen";
-
     const db = await getDb();
     await db.collection("users").updateOne(
       { _id: new ObjectId(locals.user._id.toString()) },
       {
         $set: {
-          "settings.defaultPriority": defaultPriority,
-          "settings.defaultStatus": defaultStatus,
+          defaultSettings: {
+            prioritaet: data.get("defaultPrioritaet") || "mittel",
+            status: data.get("defaultStatus") || "offen",
+            typ: data.get("defaultTyp") || "Sonstiges",
+          },
         },
       }
     );
-
-    return { standardSuccess: true };
+    throw redirect(303, "/einstellungen");
   },
 
   navigation: async ({ request, locals }) => {
@@ -170,7 +146,6 @@ export const actions = {
         },
       }
     );
-
     return { navigationSuccess: true };
   },
 };

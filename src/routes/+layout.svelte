@@ -227,9 +227,7 @@
                 <a href="/admin" on:click={() => (userMenuOffen = false)}>👑 Admin-Panel</a>
               {/if}
               <div class="dropdown-divider"></div>
-              <form method="POST" action="/logout">
-                <button type="submit">🚪 Abmelden</button>
-              </form>
+              <a href="/logout" class="logout-link">🚪 Abmelden</a>
             </div>
           {/if}
         </div>
@@ -615,27 +613,35 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     animation: dropIn 0.15s ease;
   }
-  .user-dropdown a,
-  .user-dropdown button {
+  .user-dropdown a {
     display: block;
     color: var(--text-secondary);
     text-decoration: none;
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 0.875rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    width: 100%;
     transition: background 0.15s, color 0.15s;
   }
-  .user-dropdown a:hover,
-  .user-dropdown button:hover {
+  .user-dropdown a:hover {
     background: var(--hover-bg);
     color: var(--text-primary);
   }
-  .user-dropdown form { margin: 0; padding: 0; }
+  .logout-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    display: block;
+    transition: background 0.15s, color 0.15s;
+  }
+  .logout-link:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+  }
   .dropdown-divider {
     height: 1px;
     background: var(--nav-border);

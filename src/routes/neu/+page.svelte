@@ -1,6 +1,7 @@
 <script>
   import { enhance } from "$app/forms";
   import { addToast } from "$lib/toast.js";
+  export let data;
   export let form;
   let laden = false;
   let fortschrittWert = 0;
@@ -41,11 +42,11 @@
     <label>
       Typ
       <select name="typ">
-        <option value="Prüfung">📝 Prüfung</option>
-        <option value="Projekt">🔨 Projekt</option>
-        <option value="Übung">📚 Übung</option>
-        <option value="Seminararbeit">📄 Seminararbeit</option>
-        <option value="Sonstiges" selected>📌 Sonstiges</option>
+        <option value="Prüfung" selected={data.defaults.typ === "Prüfung"}>📝 Prüfung</option>
+        <option value="Projekt" selected={data.defaults.typ === "Projekt"}>🔨 Projekt</option>
+        <option value="Übung" selected={data.defaults.typ === "Übung"}>📚 Übung</option>
+        <option value="Seminararbeit" selected={data.defaults.typ === "Seminararbeit"}>📄 Seminararbeit</option>
+        <option value="Sonstiges" selected={data.defaults.typ === "Sonstiges" || !data.defaults.typ}>📌 Sonstiges</option>
       </select>
     </label>
 
@@ -64,9 +65,9 @@
     <label>
       Priorität
       <select name="prioritaet">
-        <option value="hoch">🔴 Hoch</option>
-        <option value="mittel" selected>🟡 Mittel</option>
-        <option value="niedrig">🟢 Niedrig</option>
+        <option value="hoch" selected={data.defaults.prioritaet === "hoch"}>🔴 Hoch</option>
+        <option value="mittel" selected={data.defaults.prioritaet === "mittel"}>🟡 Mittel</option>
+        <option value="niedrig" selected={data.defaults.prioritaet === "niedrig"}>🟢 Niedrig</option>
       </select>
     </label>
   </div>
@@ -74,9 +75,9 @@
   <label>
     Status
     <select name="status">
-      <option value="offen" selected>📋 Offen</option>
-      <option value="in-bearbeitung">⚙️ In Bearbeitung</option>
-      <option value="erledigt">✅ Erledigt</option>
+      <option value="offen" selected={data.defaults.status === "offen"}>📋 Offen</option>
+      <option value="in-bearbeitung" selected={data.defaults.status === "in-bearbeitung"}>⚙️ In Bearbeitung</option>
+      <option value="erledigt" selected={data.defaults.status === "erledigt"}>✅ Erledigt</option>
     </select>
   </label>
 

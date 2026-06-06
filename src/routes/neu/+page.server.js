@@ -1,5 +1,22 @@
 import { getDb } from "$lib/db.js";
+import { ObjectId } from "mongodb";
 import { redirect, fail } from "@sveltejs/kit";
+
+export async function load({ locals }) {
+  if (!locals.user) throw redirect(303, "/login");
+
+  const db = await getDb();
+  const user = await db.collection("users").findOne({ _id: new ObjectId(locals.user._id.toString()) });
+  const def = user?.defaultSettings || {};
+
+  return {
+    defaults: {
+      prioritaet: def.prioritaet || "mittel",
+      status: def.status || "offen",
+      typ: def.typ || "Sonstiges",
+    },
+  };
+}
 
 export const actions = {
   default: async ({ request, locals }) => {

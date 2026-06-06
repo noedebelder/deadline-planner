@@ -14,7 +14,7 @@ async function adminErstellen() {
       password: hash,
       role: "admin",
       erstellt: new Date(),
-      notificationSettings: { nearDeadline: false, overdue: false },
+      notificationSettings: { nearDeadline: false },
       settings: { defaultPriority: "mittel", defaultStatus: "offen" },
     });
   } else if (!existing.email) {
@@ -86,7 +86,7 @@ export const actions = {
       password: hash,
       role: "user",
       erstellt: new Date(),
-      notificationSettings: { nearDeadline: false, overdue: false },
+      notificationSettings: { nearDeadline: false },
       settings: { defaultPriority: "mittel", defaultStatus: "offen" },
     });
 
