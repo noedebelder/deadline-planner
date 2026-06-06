@@ -4,35 +4,116 @@
   import Toast from "$lib/Toast.svelte";
   export let data;
 
-  let darkMode = false;
+  let darkMode = true;
   let notifOffen = false;
+  let userMenuOffen = false;
+
+  let aiOffen = false;
+  let aiInput = "";
+  let loading = false;
+  let ungeleseneNachrichten = 0;
+  let messages = [
+    {
+      role: "assistant",
+      content: "👋 Hallo! Ich bin dein KI-Assistent.\nIch kenne deine Deadlines und helfe dir beim Planen!"
+    }
+  ];
 
   onMount(() => {
-    darkMode = document.documentElement.getAttribute("data-theme") === "dark";
+    const saved = localStorage.getItem("theme") || "dark";
+    darkMode = saved === "dark";
+    document.documentElement.setAttribute("data-theme", saved);
   });
 
-  function toggleDark() {
+  function toggleTheme() {
     darkMode = !darkMode;
     const theme = darkMode ? "dark" : "light";
-    localStorage.setItem("theme", theme);
     document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
   }
 
   function toggleNotif() {
     notifOffen = !notifOffen;
+    if (notifOffen) userMenuOffen = false;
+  }
+
+  function toggleUserMenu() {
+    userMenuOffen = !userMenuOffen;
+    if (userMenuOffen) notifOffen = false;
+  }
+
+  function toggleAI() {
+    aiOffen = !aiOffen;
+    if (aiOffen) {
+      ungeleseneNachrichten = 0;
+      setTimeout(scrollToBottom, 100);
+    }
+  }
+
+  function scrollToBottom() {
+    const el = document.getElementById("aiMessages");
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  async function aiSenden() {
+    if (!aiInput.trim() || loading) return;
+    const text = aiInput.trim();
+    aiInput = "";
+    messages = [...messages, { role: "user", content: text }];
+    loading = true;
+    setTimeout(scrollToBottom, 50);
+
+    const history = messages
+      .slice(1, -1)
+      .slice(-10)
+      .map((m) => ({ role: m.role, content: m.content }));
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, history })
+      });
+      const responseData = await res.json();
+      messages = [
+        ...messages,
+        {
+          role: "assistant",
+          content: responseData.reply || responseData.error || "Unbekannter Fehler"
+        }
+      ];
+      if (!aiOffen) ungeleseneNachrichten++;
+    } catch {
+      messages = [
+        ...messages,
+        { role: "assistant", content: "❌ Verbindungsfehler. Bitte versuche es erneut." }
+      ];
+    }
+    loading = false;
+    setTimeout(scrollToBottom, 50);
+  }
+
+  function quickSend(text) {
+    aiInput = text;
+    aiSenden();
+  }
+
+  function aiKeydown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      aiSenden();
+    }
   }
 </script>
 
-<svelte:window on:click={() => (notifOffen = false)} />
+<svelte:window on:click={() => { notifOffen = false; userMenuOffen = false; }} />
 
-<!-- Navigations-Ladebalken -->
 {#if $navigating}
   <div class="progress-bar"></div>
 {/if}
 
 <Toast />
 
-<!-- Hintergrund-Blobs für Glassmorphism -->
 <div class="bg-blobs" aria-hidden="true">
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
@@ -40,177 +121,127 @@
 </div>
 
 {#if data.user}
-  <!-- ═══ EINGELOGGT: Sidebar + Inhalt ═══ -->
   <div class="app-layout">
 
-    <aside class="sidebar">
-
-      <!-- Logo -->
-      <a href="/" class="sidebar-brand" title="Deadline Planner">
+    <!-- ═══ OBERE LEISTE ═══ -->
+    <header class="navbar-top">
+      <div class="nav-brand">
         <span class="brand-icon">📅</span>
-        <span class="brand-text">Deadline Planner</span>
-      </a>
+        <span class="brand-name">Deadline Planner</span>
+      </div>
 
-      <!-- Navigation -->
-      <nav class="sidebar-nav">
+      <div class="nav-top-actions">
 
-        <a href="/" title="Übersicht" class:active={$page.url.pathname === "/"}>
-          <i class="icon">
-            🏠
-            {#if data.baldFaellig > 0}
-              <span class="icon-badge">{data.baldFaellig}</span>
+        <!-- Benachrichtigungen -->
+        <div class="notification-menu">
+          <button
+            class="icon-btn"
+            class:aktiv={notifOffen}
+            on:click|stopPropagation={toggleNotif}
+            title="Benachrichtigungen"
+            type="button"
+          >
+            🔔
+            {#if (data.baldFaellig ?? 0) > 0}
+              <span class="badge">{data.baldFaellig}</span>
             {/if}
-          </i>
-          <span class="label">
-            Übersicht
-            {#if data.baldFaellig > 0}
-              <span class="label-badge">{data.baldFaellig}</span>
-            {/if}
-          </span>
-        </a>
+          </button>
 
-        <a href="/neu" title="Neue Deadline" class="neu-link" class:active={$page.url.pathname === "/neu"}>
-          <i class="icon">➕</i>
-          <span class="label">Neue Deadline</span>
-        </a>
+          {#if notifOffen}
+            <div class="notif-dropdown">
+              <div class="notif-kopf">
+                <span class="notif-kopf-titel">Benachrichtigungen</span>
+                <span class="notif-kopf-zaehler {(data.benachrichtigungen?.length ?? 0) === 0 ? 'leer' : ''}">
+                  {data.benachrichtigungen?.length ?? 0}
+                </span>
+              </div>
+              {#if !(data.benachrichtigungen?.length)}
+                <div class="notif-leer">✅ Keine dringenden Deadlines</div>
+              {:else}
+                <div class="notif-liste">
+                  {#each data.benachrichtigungen as n}
+                    <a
+                      href="/deadline/{n.id}"
+                      class="notif-zeile {n.typ}"
+                      on:click={() => (notifOffen = false)}
+                    >
+                      <span class="notif-typ-icon">
+                        {#if n.typ === "ueberfaellig"}🔴{:else if n.typ === "heute"}🟠{:else}🟡{/if}
+                      </span>
+                      <div class="notif-info">
+                        <p class="notif-name">{n.titel}</p>
+                        <p class="notif-meta">
+                          {n.modul} ·
+                          {#if n.tage < 0}
+                            Überfällig seit {Math.abs(n.tage)} Tag{Math.abs(n.tage) !== 1 ? "en" : ""}
+                          {:else if n.tage === 0}
+                            Heute fällig!
+                          {:else}
+                            In {n.tage} Tag{n.tage !== 1 ? "en" : ""} fällig
+                          {/if}
+                        </p>
+                      </div>
+                      <span class="notif-pfeil">→</span>
+                    </a>
+                  {/each}
+                </div>
+                <a href="/" class="notif-footer-link" on:click={() => (notifOffen = false)}>
+                  Alle Deadlines ansehen →
+                </a>
+              {/if}
+            </div>
+          {/if}
+        </div>
 
-        <a href="/tagesplanung" title="Tagesplanung" class:active={$page.url.pathname === "/tagesplanung"}>
-          <i class="icon">📋</i>
-          <span class="label">Tagesplanung</span>
-        </a>
-
-        <a href="/kalender" title="Kalender" class:active={$page.url.pathname === "/kalender"}>
-          <i class="icon">📅</i>
-          <span class="label">Kalender</span>
-        </a>
-
-        <a href="/module" title="Module" class:active={$page.url.pathname === "/module"}>
-          <i class="icon">📚</i>
-          <span class="label">Module</span>
-        </a>
-
-        <a href="/statistik" title="Statistik" class:active={$page.url.pathname === "/statistik"}>
-          <i class="icon">📊</i>
-          <span class="label">Statistik</span>
-        </a>
-
-        <a href="/assistent" title="KI-Assistent" class:active={$page.url.pathname === "/assistent"}>
-          <i class="icon">🤖</i>
-          <span class="label">KI-Assistent</span>
-        </a>
-
-        <a href="/archiv" title="Archiv" class:active={$page.url.pathname === "/archiv"}>
-          <i class="icon">🗂️</i>
-          <span class="label">Archiv</span>
-        </a>
-
-        {#if data.user.role === "admin"}
-          <a href="/admin" title="Admin" class:active={$page.url.pathname === "/admin"}>
-            <i class="icon">👑</i>
-            <span class="label">Admin</span>
-          </a>
-        {/if}
-
-      </nav>
-
-      <!-- Footer: Einstellungen, Dark Mode, User, Logout -->
-      <div class="sidebar-footer">
-
-        <a href="/einstellungen" title="Einstellungen" class:active={$page.url.pathname === "/einstellungen"}>
-          <i class="icon">⚙️</i>
-          <span class="label">Einstellungen</span>
-        </a>
-
-        <button class="sidebar-btn" on:click={toggleDark} title={darkMode ? "Helles Design" : "Dunkles Design"} type="button">
-          <i class="icon">{darkMode ? "☀️" : "🌙"}</i>
-          <span class="label">{darkMode ? "Helles Design" : "Dunkles Design"}</span>
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" on:click={toggleTheme} title="Design wechseln" type="button">
+          {#if darkMode}☀️{:else}🌙{/if}
         </button>
 
-        <div class="user-info" title={data.user.username}>
-          <i class="icon">👤</i>
-          <span class="label">{data.user.username}</span>
-        </div>
+        <!-- Neue Deadline -->
+        <a href="/neu" class="btn-primary">+ Neue Deadline</a>
 
-        <form method="POST" action="/logout">
-          <button type="submit" class="sidebar-btn logout-btn" title="Abmelden">
-            <i class="icon">🚪</i>
-            <span class="label">Abmelden</span>
+        <!-- User Dropdown -->
+        <div class="user-menu">
+          <button
+            class="user-btn"
+            class:offen={userMenuOffen}
+            on:click|stopPropagation={toggleUserMenu}
+            type="button"
+          >
+            <span class="user-avatar">{data.user?.username?.[0]?.toUpperCase() ?? "?"}</span>
+            <span class="user-name">{data.user?.username}</span>
+            <span class="chevron">▾</span>
           </button>
-        </form>
+          {#if userMenuOffen}
+            <div class="user-dropdown">
+              <a href="/einstellungen" on:click={() => (userMenuOffen = false)}>⚙️ Einstellungen</a>
+              {#if data.user?.role === "admin"}
+                <a href="/admin" on:click={() => (userMenuOffen = false)}>👑 Admin-Panel</a>
+              {/if}
+              <div class="dropdown-divider"></div>
+              <form method="POST" action="/logout">
+                <button type="submit">🚪 Abmelden</button>
+              </form>
+            </div>
+          {/if}
+        </div>
 
       </div>
-    </aside>
+    </header>
 
-    <!-- Hauptinhalt -->
+    <!-- ═══ TAB-LEISTE ═══ -->
+    <nav class="navbar-tabs">
+      <a href="/" class:active={$page.url.pathname === "/"}>🏠 Übersicht</a>
+      <a href="/tagesplanung" class:active={$page.url.pathname === "/tagesplanung"}>📋 Tagesplanung</a>
+      <a href="/kalender" class:active={$page.url.pathname === "/kalender"}>📅 Kalender</a>
+      <a href="/module" class:active={$page.url.pathname === "/module"}>📚 Module</a>
+      <a href="/statistik" class:active={$page.url.pathname === "/statistik"}>📊 Statistik</a>
+      <a href="/archiv" class:active={$page.url.pathname === "/archiv"}>🗂️ Archiv</a>
+    </nav>
+
+    <!-- ═══ HAUPTINHALT ═══ -->
     <main class="main-content">
-
-      <!-- Top-Bar mit Benachrichtigungs-Glocke -->
-      <header class="top-bar">
-        <div class="top-bar-links"></div>
-        <div class="top-bar-rechts">
-          <div class="notification-menu">
-            <button
-              class="notif-glocke"
-              on:click|stopPropagation={toggleNotif}
-              title="Benachrichtigungen"
-              type="button"
-              class:aktiv={notifOffen}
-            >
-              🔔
-              {#if (data.benachrichtigungen?.length ?? 0) > 0}
-                <span class="notif-badge-dot">{data.benachrichtigungen.length}</span>
-              {/if}
-            </button>
-
-            {#if notifOffen}
-              <div class="notif-dropdown">
-                <div class="notif-kopf">
-                  <span class="notif-kopf-titel">Benachrichtigungen</span>
-                  <span class="notif-kopf-zaehler {(data.benachrichtigungen?.length ?? 0) === 0 ? 'leer' : ''}">
-                    {data.benachrichtigungen?.length ?? 0}
-                  </span>
-                </div>
-
-                {#if !(data.benachrichtigungen?.length)}
-                  <div class="notif-leer">✅ Keine dringenden Deadlines</div>
-                {:else}
-                  <div class="notif-liste">
-                    {#each data.benachrichtigungen as n}
-                      <a
-                        href="/deadline/{n.id}"
-                        class="notif-zeile {n.typ}"
-                        on:click={() => (notifOffen = false)}
-                      >
-                        <span class="notif-typ-icon">
-                          {#if n.typ === "ueberfaellig"}🔴{:else if n.typ === "heute"}🟠{:else}🟡{/if}
-                        </span>
-                        <div class="notif-info">
-                          <p class="notif-name">{n.titel}</p>
-                          <p class="notif-meta">
-                            {n.modul} ·
-                            {#if n.tage < 0}
-                              Überfällig seit {Math.abs(n.tage)} Tag{Math.abs(n.tage) !== 1 ? "en" : ""}
-                            {:else if n.tage === 0}
-                              Heute fällig!
-                            {:else}
-                              In {n.tage} Tag{n.tage !== 1 ? "en" : ""} fällig
-                            {/if}
-                          </p>
-                        </div>
-                        <span class="notif-pfeil">→</span>
-                      </a>
-                    {/each}
-                  </div>
-                  <a href="/" class="notif-footer-link" on:click={() => (notifOffen = false)}>
-                    Alle Deadlines ansehen →
-                  </a>
-                {/if}
-              </div>
-            {/if}
-          </div>
-        </div>
-      </header>
-
       {#key $page.url.pathname}
         <div class="page-content">
           <slot />
@@ -220,8 +251,76 @@
 
   </div>
 
+  <!-- ═══ FLOATING KI-ASSISTENT (fixed, ausserhalb app-layout) ═══ -->
+  <div class="ai-widget">
+    {#if aiOffen}
+      <div class="ai-panel">
+        <div class="ai-header">
+          <div class="ai-header-info">
+            <span class="ai-avatar-icon">🤖</span>
+            <div>
+              <p class="ai-title">KI-Assistent</p>
+              <p class="ai-status">● Online</p>
+            </div>
+          </div>
+          <button on:click={toggleAI} class="ai-close" type="button">✕</button>
+        </div>
+
+        <div class="ai-messages" id="aiMessages">
+          {#each messages as msg}
+            <div class="ai-message {msg.role}">
+              <p>{msg.content}</p>
+            </div>
+          {/each}
+          {#if loading}
+            <div class="ai-message assistant">
+              <div class="typing-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          {/if}
+        </div>
+
+        {#if messages.length <= 1}
+          <div class="ai-suggestions">
+            <button on:click={() => quickSend("Erstelle mir einen Tagesplan für heute")} type="button">
+              📅 Tagesplan
+            </button>
+            <button on:click={() => quickSend("Was sollte ich zuerst angehen?")} type="button">
+              🎯 Priorität
+            </button>
+            <button on:click={() => quickSend("Ich habe 2 Stunden Zeit, was empfiehlst du?")} type="button">
+              ⏱️ 2h Zeit
+            </button>
+          </div>
+        {/if}
+
+        <div class="ai-input-area">
+          <textarea
+            bind:value={aiInput}
+            on:keydown={aiKeydown}
+            placeholder="Frage den KI-Assistenten..."
+            rows="2"
+          ></textarea>
+          <button on:click={aiSenden} disabled={loading} class="ai-send" type="button">➤</button>
+        </div>
+      </div>
+    {/if}
+
+    <button class="ai-toggle" on:click={toggleAI} title="KI-Assistent" type="button">
+      {#if aiOffen}
+        <span>✕</span>
+      {:else}
+        <span>🤖</span>
+        {#if ungeleseneNachrichten > 0}
+          <span class="ai-badge">{ungeleseneNachrichten}</span>
+        {/if}
+      {/if}
+    </button>
+  </div>
+
 {:else}
-  <!-- ═══ NICHT EINGELOGGT: Kein Sidebar (Landing / Login) ═══ -->
+  <!-- ═══ NICHT EINGELOGGT: Kein Navbar ═══ -->
   <main class="no-auth-main">
     {#key $page.url.pathname}
       <div class="page-content">
@@ -233,6 +332,32 @@
 
 <style>
   /* ══════════════════════════════════════════
+     CSS VARIABLEN (Hell / Dunkel)
+  ══════════════════════════════════════════ */
+  :global(:root) {
+    --nav-bg: #ffffff;
+    --nav-border: #e5e7eb;
+    --text-primary: #1a1a2e;
+    --text-secondary: #6b7280;
+    --hover-bg: #f3f4f6;
+    --toggle-bg: #f9fafb;
+    --dropdown-bg: #ffffff;
+    --page-bg: #f0f2f5;
+    --card-bg: #ffffff;
+  }
+  :global([data-theme="dark"]) {
+    --nav-bg: #1a1a2e;
+    --nav-border: rgba(255,255,255,0.08);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255,255,255,0.6);
+    --hover-bg: rgba(255,255,255,0.08);
+    --toggle-bg: rgba(255,255,255,0.06);
+    --dropdown-bg: #16213e;
+    --page-bg: #0d1117;
+    --card-bg: #1a1a2e;
+  }
+
+  /* ══════════════════════════════════════════
      GLOBAL RESET + TYPOGRAPHY
   ══════════════════════════════════════════ */
   :global(*) { box-sizing: border-box; }
@@ -242,8 +367,8 @@
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     font-size: 0.95rem;
     line-height: 1.6;
-    background: #f0f2f5;
-    color: #1a1a2e;
+    background: var(--page-bg);
+    color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -299,192 +424,336 @@
   }
 
   /* ══════════════════════════════════════════
-     LAYOUT
+     APP LAYOUT
   ══════════════════════════════════════════ */
   .app-layout {
     display: flex;
+    flex-direction: column;
     min-height: 100vh;
     position: relative;
     z-index: 1;
   }
 
   /* ══════════════════════════════════════════
-     SIDEBAR
+     OBERE NAVBAR
   ══════════════════════════════════════════ */
-  .sidebar {
-    width: 64px;
-    min-height: 100vh;
-    background: #1a1a2e;
+  .navbar-top {
     display: flex;
-    flex-direction: column;
-    position: fixed;
-    left: 0; top: 0;
-    z-index: 200;
-    overflow: hidden;
-    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border-right: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
-  }
-  .sidebar:hover { width: 220px; }
-
-  /* Brand / Logo */
-  .sidebar-brand {
-    display: flex; align-items: center; gap: 12px;
-    padding: 18px; min-height: 64px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    text-decoration: none; white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .brand-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
-  .brand-text {
-    font-size: 0.95rem; font-weight: 800; color: white;
-    letter-spacing: -0.02em;
-    opacity: 0; transition: opacity 0.15s ease;
-    overflow: hidden;
-  }
-  .sidebar:hover .brand-text { opacity: 1; }
-
-  /* Nav */
-  .sidebar-nav {
-    flex: 1; display: flex; flex-direction: column;
-    padding: 10px 8px; gap: 2px; overflow: hidden;
-  }
-
-  .sidebar-nav a,
-  .sidebar-footer a,
-  .sidebar-btn {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px; border-radius: 9px;
-    color: rgba(255,255,255,0.55);
-    text-decoration: none; white-space: nowrap;
-    transition: background 0.15s, color 0.15s;
-    font-size: 0.875rem; font-weight: 500;
-    background: none; border: none; cursor: pointer;
-    width: 100%; text-align: left;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 56px;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     flex-shrink: 0;
   }
 
-  .sidebar-nav a:hover,
-  .sidebar-footer a:hover,
-  .sidebar-btn:hover {
-    background: rgba(255,255,255,0.1);
-    color: white;
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .brand-icon { font-size: 20px; }
+
+  .nav-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .sidebar-nav a.active {
-    background: rgba(233,69,96,0.18);
-    color: #e94560;
-    font-weight: 600;
-  }
-
-  .neu-link {
-    background: rgba(233,69,96,0.12) !important;
-    color: #e94560 !important;
-    font-weight: 600 !important;
-    margin-bottom: 6px;
-  }
-  .neu-link:hover {
-    background: #e94560 !important;
-    color: white !important;
-  }
-  .neu-link.active {
-    background: #e94560 !important;
-    color: white !important;
-  }
-
-  /* Icon */
-  .icon {
-    font-size: 20px; flex-shrink: 0;
-    width: 28px; height: 28px;
-    display: flex; align-items: center; justify-content: center;
+  /* Benachrichtigungs-Icon */
+  .icon-btn {
     position: relative;
+    background: var(--toggle-bg);
+    border: 1px solid var(--nav-border);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    width: 36px;
+  }
+  .icon-btn:hover { background: var(--hover-bg); }
+  .icon-btn.aktiv {
+    background: rgba(233,69,96,0.12);
+    border-color: rgba(233,69,96,0.3);
   }
 
-  /* Badge auf Icon (Collapsed-Modus sichtbar) */
-  .icon-badge {
-    position: absolute; top: -5px; right: -5px;
-    background: #e94560; color: white;
-    border-radius: 50%; font-size: 0.58rem;
-    width: 16px; height: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; line-height: 1;
-    border: 1.5px solid #1a1a2e;
-    animation: badgePulse 2s ease-in-out infinite;
+  .badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    background: #e94560;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 17px;
+    height: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--nav-bg);
+    animation: badgePuls 2s ease-in-out infinite;
+    line-height: 1;
   }
-  @keyframes badgePulse {
-    0% { box-shadow: 0 0 0 0 rgba(233,69,96,0.6); }
-    70% { box-shadow: 0 0 0 5px rgba(233,69,96,0); }
-    100% { box-shadow: 0 0 0 0 rgba(233,69,96,0); }
-  }
-
-  /* Label (expanded) */
-  .label {
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    overflow: hidden; white-space: nowrap;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .sidebar:hover .label { opacity: 1; }
-
-  /* Badge im Label-Text */
-  .label-badge {
-    background: #e94560; color: white;
-    border-radius: 20px; font-size: 0.65rem;
-    padding: 0.1rem 0.45rem; font-weight: 700;
-    line-height: 1.4; min-width: 18px; text-align: center;
+  @keyframes badgePuls {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(233,69,96,0.5); }
+    50% { box-shadow: 0 0 0 4px rgba(233,69,96,0); }
   }
 
-  /* Footer */
-  .sidebar-footer {
-    padding: 8px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    display: flex; flex-direction: column; gap: 2px;
+  /* Theme Toggle */
+  .theme-toggle {
+    background: var(--toggle-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 8px;
+    padding: 0 10px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+    color: var(--text-primary);
+  }
+  .theme-toggle:hover { background: var(--hover-bg); }
+
+  /* Neue Deadline Button */
+  .btn-primary {
+    background: #e94560;
+    color: white;
+    padding: 0 16px;
+    height: 36px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+  }
+  .btn-primary:hover { background: #c73652; }
+
+  /* User Menu */
+  .user-menu { position: relative; }
+  .user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--toggle-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 8px;
+    padding: 0 12px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    transition: background 0.2s;
+  }
+  .user-btn:hover,
+  .user-btn.offen { background: var(--hover-bg); }
+
+  .user-avatar {
+    width: 24px;
+    height: 24px;
+    background: #e94560;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
     flex-shrink: 0;
   }
-  .sidebar-footer form { width: 100%; }
+  .user-name { font-weight: 500; }
+  .chevron { opacity: 0.5; font-size: 0.75rem; }
 
-  .user-info {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px; border-radius: 9px;
-    color: rgba(255,255,255,0.3);
-    font-size: 0.875rem; white-space: nowrap;
-    cursor: default;
+  .user-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--dropdown-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 10px;
+    padding: 6px;
+    min-width: 190px;
+    z-index: 200;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    animation: dropIn 0.15s ease;
+  }
+  .user-dropdown a,
+  .user-dropdown button {
+    display: block;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: background 0.15s, color 0.15s;
+  }
+  .user-dropdown a:hover,
+  .user-dropdown button:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+  }
+  .user-dropdown form { margin: 0; padding: 0; }
+  .dropdown-divider {
+    height: 1px;
+    background: var(--nav-border);
+    margin: 4px 0;
   }
 
-  .logout-btn {
-    color: rgba(255,255,255,0.5) !important;
+  /* ══════════════════════════════════════════
+     BENACHRICHTIGUNGS-DROPDOWN
+  ══════════════════════════════════════════ */
+  .notification-menu { position: relative; }
+
+  .notif-dropdown {
+    position: absolute;
+    right: 0; top: calc(100% + 8px);
+    width: 320px;
+    background: var(--dropdown-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    overflow: hidden;
+    animation: dropIn 0.15s ease;
+    z-index: 200;
   }
-  .logout-btn:hover {
-    background: rgba(233,69,96,0.15) !important;
-    color: #e94560 !important;
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .notif-kopf {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--nav-border);
+  }
+  .notif-kopf-titel { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
+  .notif-kopf-zaehler {
+    background: #e94560; color: white;
+    font-size: 0.7rem; font-weight: 700;
+    padding: 0.15rem 0.55rem; border-radius: 20px;
+    min-width: 22px; text-align: center;
+  }
+  .notif-kopf-zaehler.leer { background: var(--hover-bg); color: var(--text-secondary); }
+
+  .notif-leer {
+    padding: 1.75rem 1rem;
+    text-align: center; color: var(--text-secondary); font-size: 0.875rem;
+  }
+
+  .notif-liste { max-height: 300px; overflow-y: auto; }
+  .notif-liste::-webkit-scrollbar { width: 4px; }
+  .notif-liste::-webkit-scrollbar-track { background: transparent; }
+  .notif-liste::-webkit-scrollbar-thumb { background: var(--nav-border); border-radius: 2px; }
+
+  .notif-zeile {
+    display: flex; align-items: flex-start; gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--nav-border);
+    text-decoration: none; color: inherit;
+    transition: background 0.12s;
+  }
+  .notif-zeile:last-child { border-bottom: none; }
+  .notif-zeile:hover { background: var(--hover-bg); }
+  .notif-zeile.ueberfaellig { border-left: 3px solid #e74c3c; }
+  .notif-zeile.heute { border-left: 3px solid #f39c12; }
+  .notif-zeile.bald { border-left: 3px solid #f1c40f; }
+
+  .notif-typ-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .notif-info { flex: 1; min-width: 0; }
+  .notif-name {
+    font-size: 0.875rem; font-weight: 600; color: var(--text-primary);
+    margin: 0 0 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .notif-meta { font-size: 0.75rem; color: var(--text-secondary); margin: 0; }
+  .notif-zeile.ueberfaellig .notif-name { color: #e74c3c; }
+  .notif-zeile.heute .notif-name { color: #e67e22; }
+  .notif-pfeil { color: var(--text-secondary); font-size: 0.85rem; align-self: center; flex-shrink: 0; opacity: 0.4; }
+
+  .notif-footer-link {
+    display: block; text-align: center;
+    padding: 0.7rem; font-size: 0.82rem;
+    color: #e94560; text-decoration: none; font-weight: 600;
+    border-top: 1px solid var(--nav-border);
+    background: var(--hover-bg);
+    transition: background 0.12s;
+  }
+  .notif-footer-link:hover { filter: brightness(0.95); }
+
+  /* ══════════════════════════════════════════
+     TAB-LEISTE
+  ══════════════════════════════════════════ */
+  .navbar-tabs {
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+    position: sticky;
+    top: 56px;
+    z-index: 99;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .navbar-tabs::-webkit-scrollbar { display: none; }
+
+  .navbar-tabs a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 12px 14px;
+    font-size: 0.875rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+  }
+  .navbar-tabs a:hover { color: var(--text-primary); }
+  .navbar-tabs a.active {
+    color: #e94560;
+    border-bottom-color: #e94560;
+    font-weight: 600;
   }
 
   /* ══════════════════════════════════════════
      HAUPTINHALT
   ══════════════════════════════════════════ */
   .main-content {
-    margin-left: 64px;
     flex: 1;
     padding: 2rem;
-    min-height: 100vh;
-    transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative; z-index: 1;
-    max-width: calc(100vw - 64px);
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
   }
 
-  /* Wenn Sidebar gehovert: Content verschiebt sich mit */
-  .sidebar:hover ~ .main-content {
-    margin-left: 220px;
-    max-width: calc(100vw - 220px);
-  }
-
-  /* Nicht eingeloggt */
   .no-auth-main {
     min-height: 100vh;
     position: relative; z-index: 1;
   }
 
-  /* Seiten-Übergangs-Animation */
   .page-content {
     animation: pageIn 0.2s ease-out both;
   }
@@ -509,13 +778,233 @@
   :global(.badge.kritisch) { box-shadow: 0 0 10px rgba(243,156,18,0.4); }
 
   /* ══════════════════════════════════════════
-     DARK MODE — GLOBAL
+     FLOATING KI-ASSISTENT
   ══════════════════════════════════════════ */
-  :global([data-theme="dark"] body) {
-    background: #0d1117;
-    color: #e6edf3;
+  .ai-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
   }
 
+  .ai-toggle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #e94560;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 22px;
+    box-shadow: 0 4px 20px rgba(233,69,96,0.4);
+    transition: all 0.2s;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .ai-toggle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 24px rgba(233,69,96,0.55);
+  }
+
+  .ai-badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    background: #f39c12;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-panel {
+    width: 340px;
+    height: 480px;
+    background: var(--card-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.25);
+    animation: slideUp 0.2s ease;
+    overflow: hidden;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .ai-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #e94560;
+    color: white;
+    flex-shrink: 0;
+  }
+  .ai-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ai-avatar-icon {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .ai-title { font-weight: 700; font-size: 0.9rem; margin: 0; }
+  .ai-status { font-size: 0.75rem; margin: 0; opacity: 0.85; }
+  .ai-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+  }
+  .ai-close:hover { background: rgba(255,255,255,0.2); }
+
+  .ai-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scroll-behavior: smooth;
+  }
+  .ai-messages::-webkit-scrollbar { width: 4px; }
+  .ai-messages::-webkit-scrollbar-track { background: transparent; }
+  .ai-messages::-webkit-scrollbar-thumb { background: var(--nav-border); border-radius: 2px; }
+
+  .ai-message {
+    max-width: 85%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  .ai-message p { margin: 0; white-space: pre-wrap; }
+
+  .ai-message.user {
+    background: #e94560;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .ai-message.assistant {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  .typing-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 4px 0;
+  }
+  .typing-dots span {
+    width: 7px; height: 7px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  .ai-suggestions {
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    flex-shrink: 0;
+    border-top: 1px solid var(--nav-border);
+  }
+  .ai-suggestions button {
+    background: var(--hover-bg);
+    border: 1px solid var(--nav-border);
+    color: var(--text-secondary);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .ai-suggestions button:hover {
+    background: #e94560;
+    color: white;
+    border-color: #e94560;
+  }
+
+  .ai-input-area {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--nav-border);
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+  .ai-input-area textarea {
+    flex: 1;
+    background: var(--hover-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    resize: none;
+    font-family: inherit;
+    line-height: 1.4;
+  }
+  .ai-input-area textarea:focus {
+    outline: none;
+    border-color: #e94560;
+    box-shadow: 0 0 0 3px rgba(233,69,96,0.12);
+  }
+  .ai-input-area textarea::placeholder { color: var(--text-secondary); }
+  .ai-send {
+    width: 36px; height: 36px;
+    background: #e94560;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .ai-send:hover { background: #c73652; }
+  .ai-send:disabled { background: #999; cursor: not-allowed; }
+
+  /* ══════════════════════════════════════════
+     DARK MODE — GLOBAL (Kindseiten)
+  ══════════════════════════════════════════ */
   :global([data-theme="dark"] .stat-card),
   :global([data-theme="dark"] .tabelle-container),
   :global([data-theme="dark"] .leer),
@@ -692,258 +1181,24 @@
   :global([data-theme="dark"] .leer-emoji) { filter: grayscale(0.2); }
 
   /* ══════════════════════════════════════════
-     MOBILE: Sidebar als Bottom-Bar
+     MOBILE
   ══════════════════════════════════════════ */
   @media (max-width: 768px) {
-    .sidebar {
-      width: 100%;
-      height: 56px;
-      min-height: unset;
-      flex-direction: row;
-      top: auto; bottom: 0; left: 0; right: 0;
-      overflow-x: auto; overflow-y: hidden;
-      border-right: none;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 -2px 12px rgba(0,0,0,0.2);
-    }
-    /* Hover-Effekt auf Mobile deaktivieren */
-    .sidebar:hover { width: 100%; height: 56px; }
-
-    .sidebar-brand { display: none; }
-
-    .sidebar-nav {
-      flex-direction: row;
-      flex: 1;
-      padding: 0 4px;
-      gap: 0;
-      align-items: center;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .sidebar-nav::-webkit-scrollbar { display: none; }
-    .sidebar-nav a { padding: 8px 10px; border-radius: 8px; }
-
-    .sidebar-footer {
-      flex-direction: row; border-top: none;
-      border-left: 1px solid rgba(255,255,255,0.08);
-      padding: 0 4px; align-items: center;
-      flex-shrink: 0;
-    }
-    .sidebar-footer form { width: auto; }
-    .sidebar-footer .sidebar-btn,
-    .sidebar-footer a { padding: 8px 10px; }
-    .user-info { display: none; }
-
-    /* Labels auf Mobile immer versteckt */
-    .label { display: none !important; }
-    .brand-text { display: none; }
-
-    .main-content {
-      margin-left: 0 !important;
-      margin-bottom: 56px;
-      padding: 1rem;
-      max-width: 100%;
-    }
-    .sidebar:hover ~ .main-content {
-      margin-left: 0 !important;
-      max-width: 100%;
-    }
+    .navbar-top { padding: 0 1rem; }
+    .user-name { display: none; }
+    .brand-name { display: none; }
+    .btn-primary { padding: 0 10px; font-size: 0.8rem; }
+    .main-content { padding: 1rem; }
+    .notif-dropdown { width: 290px; right: -8px; }
+    .user-dropdown { right: 0; }
+    .ai-panel { width: calc(100vw - 2rem); }
+    .ai-widget { right: 1rem; bottom: 1rem; }
   }
 
   @media (max-width: 480px) {
     :global(h1) { font-size: 1.6rem; }
     .main-content { padding: 0.75rem; }
-  }
-
-  /* ══════════════════════════════════════════
-     TOP-BAR (Notification-Leiste)
-  ══════════════════════════════════════════ */
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.6rem 0;
-    margin-bottom: 1.5rem;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    /* Negiert main-content padding seitlich → volle Breite */
-    margin-left: -2rem;
-    margin-right: -2rem;
-    margin-top: -2rem;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    background: rgba(240, 242, 245, 0.92);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-  }
-
-  .top-bar-links { flex: 1; }
-  .top-bar-rechts { display: flex; align-items: center; gap: 0.5rem; }
-
-  /* ══════════════════════════════════════════
-     BENACHRICHTIGUNGS-GLOCKE
-  ══════════════════════════════════════════ */
-  .notification-menu { position: relative; }
-
-  .notif-glocke {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    cursor: pointer; font-size: 1.15rem;
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
-    transition: background 0.15s, transform 0.15s;
-    color: #1a1a2e;
-  }
-  .notif-glocke:hover { background: rgba(0, 0, 0, 0.09); transform: scale(1.05); }
-  .notif-glocke.aktiv {
-    background: rgba(233, 69, 96, 0.1);
-    border-color: rgba(233, 69, 96, 0.25);
-  }
-
-  /* Badge-Punkt auf der Glocke */
-  .notif-badge-dot {
-    position: absolute; top: -4px; right: -4px;
-    background: #e94560; color: white;
-    font-size: 0.58rem; font-weight: 700;
-    border-radius: 50%;
-    min-width: 18px; height: 18px;
-    display: flex; align-items: center; justify-content: center;
-    border: 2px solid rgba(240, 242, 245, 0.9);
-    animation: glockenPuls 2s ease-in-out infinite;
-    line-height: 1; padding: 0 2px;
-  }
-  @keyframes glockenPuls {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(233,69,96,0.5); }
-    50% { transform: scale(1.1); box-shadow: 0 0 0 4px rgba(233,69,96,0); }
-  }
-
-  /* ══════════════════════════════════════════
-     DROPDOWN
-  ══════════════════════════════════════════ */
-  .notif-dropdown {
-    position: absolute;
-    right: 0; top: calc(100% + 10px);
-    width: 320px;
-    background: white;
-    border-radius: 14px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06);
-    overflow: hidden;
-    animation: dropIn 0.18s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 300;
-  }
-  @keyframes dropIn {
-    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
-  .notif-kopf {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0.85rem 1rem;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .notif-kopf-titel { font-weight: 700; font-size: 0.9rem; color: #1a1a2e; }
-  .notif-kopf-zaehler {
-    background: #e94560; color: white;
-    font-size: 0.7rem; font-weight: 700;
-    padding: 0.15rem 0.55rem; border-radius: 20px; min-width: 22px; text-align: center;
-  }
-  .notif-kopf-zaehler.leer { background: #e0e0e0; color: #999; }
-
-  .notif-leer {
-    padding: 1.75rem 1rem;
-    text-align: center; color: #888; font-size: 0.875rem;
-  }
-
-  .notif-liste { max-height: 300px; overflow-y: auto; }
-  .notif-liste::-webkit-scrollbar { width: 4px; }
-  .notif-liste::-webkit-scrollbar-track { background: transparent; }
-  .notif-liste::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 2px; }
-
-  .notif-zeile {
-    display: flex; align-items: flex-start; gap: 0.65rem;
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #f5f5f5;
-    text-decoration: none; color: inherit;
-    transition: background 0.12s;
-  }
-  .notif-zeile:last-child { border-bottom: none; }
-  .notif-zeile:hover { background: #f8f9ff; }
-
-  .notif-zeile.ueberfaellig { border-left: 3px solid #e74c3c; }
-  .notif-zeile.heute { border-left: 3px solid #f39c12; }
-  .notif-zeile.bald { border-left: 3px solid #f1c40f; }
-
-  .notif-typ-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.1rem; }
-
-  .notif-info { flex: 1; min-width: 0; }
-  .notif-name {
-    font-size: 0.875rem; font-weight: 600; color: #1a1a2e;
-    margin: 0 0 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .notif-meta { font-size: 0.75rem; color: #888; margin: 0; }
-
-  .notif-zeile.ueberfaellig .notif-name { color: #e74c3c; }
-  .notif-zeile.heute .notif-name { color: #e67e22; }
-
-  .notif-pfeil { color: #ccc; font-size: 0.85rem; align-self: center; flex-shrink: 0; }
-
-  .notif-footer-link {
-    display: block; text-align: center;
-    padding: 0.7rem; font-size: 0.82rem;
-    color: #e94560; text-decoration: none; font-weight: 600;
-    border-top: 1px solid #f0f0f0;
-    background: #fafbff;
-    transition: background 0.12s;
-  }
-  .notif-footer-link:hover { background: #f0f2ff; }
-
-  /* Dark Mode – Top-Bar & Dropdown */
-  :global([data-theme="dark"]) .top-bar {
-    background: rgba(13, 17, 23, 0.9) !important;
-    border-bottom-color: rgba(255,255,255,0.06) !important;
-  }
-  :global([data-theme="dark"]) .notif-glocke {
-    background: rgba(255,255,255,0.08) !important;
-    border-color: rgba(255,255,255,0.1) !important;
-    color: #e6edf3 !important;
-  }
-  :global([data-theme="dark"]) .notif-glocke:hover { background: rgba(255,255,255,0.12) !important; }
-  :global([data-theme="dark"]) .notif-glocke.aktiv {
-    background: rgba(233,69,96,0.15) !important;
-    border-color: rgba(233,69,96,0.3) !important;
-  }
-  :global([data-theme="dark"]) .notif-badge-dot { border-color: rgba(13,17,23,0.9) !important; }
-  :global([data-theme="dark"]) .notif-dropdown {
-    background: rgba(22,27,34,0.98) !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08) !important;
-  }
-  :global([data-theme="dark"]) .notif-kopf { border-bottom-color: rgba(255,255,255,0.08) !important; }
-  :global([data-theme="dark"]) .notif-kopf-titel { color: #e6edf3 !important; }
-  :global([data-theme="dark"]) .notif-zeile { border-bottom-color: rgba(255,255,255,0.05) !important; }
-  :global([data-theme="dark"]) .notif-zeile:hover { background: rgba(255,255,255,0.04) !important; }
-  :global([data-theme="dark"]) .notif-name { color: #e6edf3 !important; }
-  :global([data-theme="dark"]) .notif-zeile.ueberfaellig .notif-name { color: #f87171 !important; }
-  :global([data-theme="dark"]) .notif-zeile.heute .notif-name { color: #fbbf24 !important; }
-  :global([data-theme="dark"]) .notif-footer-link { background: rgba(13,17,23,0.5) !important; border-top-color: rgba(255,255,255,0.08) !important; }
-  :global([data-theme="dark"]) .notif-footer-link:hover { background: rgba(30,45,74,0.5) !important; }
-  :global([data-theme="dark"]) .notif-leer { color: #4d5566 !important; }
-
-  @media (max-width: 768px) {
-    .top-bar {
-      margin-left: -1rem; margin-right: -1rem;
-      margin-top: -1rem;
-      padding-left: 1rem; padding-right: 1rem;
-    }
-    .notif-dropdown { width: 290px; right: -8px; }
-  }
-  @media (max-width: 480px) {
-    .top-bar { margin-left: -0.75rem; margin-right: -0.75rem; padding-left: 0.75rem; padding-right: 0.75rem; }
-    .notif-dropdown { width: calc(100vw - 2rem); right: -0.75rem; }
+    .notif-dropdown { width: calc(100vw - 2rem); right: -4rem; }
+    .nav-top-actions { gap: 4px; }
   }
 </style>
